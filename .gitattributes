@@ -1,0 +1,3 @@
+# LF everywhere, on every platform. Rubrics are prompt text and prompts must be
+# byte-identical across machines (CLAUDE.md §7.3, test T7).
+* text=auto eol=lf
