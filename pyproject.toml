@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "propel"
+version = "0.1.0"
+description = "PROPensity Estimation Library: demand-interval annotation and propensity fitting for AI models"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pandas>=2.0",
+    "statsmodels>=0.14",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# One extra per provider SDK: installing one is never required to use another (CLAUDE.md §4.1).
+openai = ["openai>=1.40"]
+azure = ["openai>=1.40"]
+anthropic = ["anthropic"]
+google = ["google-genai"]
+http = ["httpx"]
+plot = ["matplotlib", "seaborn"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["propensity*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

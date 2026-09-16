@@ -1,6 +1,9 @@
 # Prior implementation: local reference only, never committed
 neurips/
 
+# Data for reproducibility purposes, never commited
+reproducibility/
+
 # Python
 __pycache__/
 *.py[cod]
