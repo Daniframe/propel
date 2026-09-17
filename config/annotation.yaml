@@ -2,9 +2,10 @@
 # Credentials never go in this file: each provider adapter reads its own environment
 # variables, and can be pointed at a different variable name per run.
 
-provider: openai
-model: gpt-4.1
-provider_options: {}      # extra keyword arguments for the provider, e.g. base_url
+provider: openai          # openai | azure | anthropic | google | http | mock
+model: gpt-4.1            # for azure, the deployment name
+provider_options: {}      # extra keyword arguments for the provider, e.g. base_url, or
+                          # send_temperature: false for a model that rejects temperature
 
 temperature: 0.0          # keep at 0: intervals must be stable across reruns (CLAUDE.md §8)
 max_tokens: null          # provider default; adapters that require a value supply their own

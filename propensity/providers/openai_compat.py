@@ -5,10 +5,13 @@ OpenRouter, Together or an in-house gateway. The SDK is imported lazily.
 """
 
 import json
+import logging
 import os
 
 from . import register_provider
 from .base import Completion
+
+logger = logging.getLogger(__name__)
 
 CHAT_URL = "/v1/chat/completions"
 # OpenAI's own batch statuses, mapped onto BatchState.
@@ -21,28 +24,37 @@ class OpenAICompatProvider:
     """One chat completion per call. The api_key comes from here or from `api_key_env`;
     `client` takes an already-built SDK client, which is how the tests stay off the network;
     `request_options` is merged into every request, for a model that wants something else such
-    as `max_completion_tokens`; any other keyword goes to the SDK client."""
+    as `max_completion_tokens`; `send_temperature=False` is for models that reject sampling
+    parameters; any other keyword goes to the SDK client."""
 
     name = "openai"
     api_key_env = "OPENAI_API_KEY"
-    batch_url = CHAT_URL
+    batch_url = CHAT_URL        # the "url" on every line of a batch file
+    batch_endpoint = CHAT_URL   # what batches.create is told
 
     def __init__(self, model: str, *, api_key=None, api_key_env=None, base_url=None, client=None,
-                 request_options=None, **client_options):
+                 request_options=None, send_temperature=True, **client_options):
         self.model = model
         self.base_url = base_url
         self.request_options = dict(request_options or {})
+        self.send_temperature = send_temperature
+        if not send_temperature:
+            logger.warning("temperature is not sent to %s:%s, so its intervals may differ between "
+                           "reruns (CLAUDE.md §8)", self.name, model)
         self.client = client if client is not None else self._client(
             api_key, api_key_env or self.api_key_env, base_url, client_options)
 
-    def _client(self, api_key, api_key_env, base_url, client_options):
+    def _sdk(self):
         try:
             import openai
         except ImportError:
             raise ImportError(f"the {self.name!r} provider needs the openai package: "
-                              'pip install "propel[openai]"') from None
-        return openai.OpenAI(api_key=api_key or os.environ.get(api_key_env),
-                             base_url=base_url, **client_options)
+                              f'pip install "propel[{self.name}]"') from None
+        return openai
+
+    def _client(self, api_key, api_key_env, base_url, client_options):
+        return self._sdk().OpenAI(api_key=api_key or os.environ.get(api_key_env),
+                                  base_url=base_url, **client_options)
 
     def complete(self, system: str, user: str, *, temperature: float = 0.0,
                  max_tokens: int | None = None) -> Completion:
@@ -59,9 +71,11 @@ class OpenAICompatProvider:
 
     def request_body(self, system: str, user: str, temperature: float, max_tokens) -> dict:
         """The system part travels as a `system` role message here (§4.1 rule 6)."""
-        body = {"model": self.model, "temperature": temperature,
+        body = {"model": self.model,
                 "messages": [{"role": "system", "content": system},
                              {"role": "user", "content": user}]}
+        if self.send_temperature:
+            body["temperature"] = temperature
         if max_tokens is not None:
             body["max_tokens"] = max_tokens
         return {**body, **self.request_options}
@@ -78,7 +92,7 @@ class OpenAIBatchProvider(OpenAICompatProvider):
                  for request in requests]
         upload = self.client.files.create(file=("batch_input.jsonl", "\n".join(lines).encode()),
                                           purpose="batch")
-        return self.client.batches.create(input_file_id=upload.id, endpoint=self.batch_url,
+        return self.client.batches.create(input_file_id=upload.id, endpoint=self.batch_endpoint,
                                           completion_window="24h").id
 
     def poll_batch(self, batch_id: str) -> str:
@@ -127,10 +141,9 @@ def _build(model: str, *, batch=None, **kwargs):
     provider = OpenAICompatProvider(model, **kwargs)
     if batch is None:
         batch = provider.base_url is None or _probe(provider.client)
-    if not batch:
-        return provider
-    return OpenAIBatchProvider(model, client=provider.client, base_url=provider.base_url,
-                               request_options=provider.request_options)
+    if batch:
+        provider.__class__ = OpenAIBatchProvider  # the batch class adds methods only, no state
+    return provider
 
 
 register_provider("openai", _build)

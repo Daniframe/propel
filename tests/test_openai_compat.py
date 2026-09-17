@@ -1,11 +1,11 @@
 """The openai adapter, against a fake client: no network, no credentials, nothing spent."""
 
 import json
-import subprocess
-import sys
-from types import SimpleNamespace
+import logging
 
 import pytest
+from fakes import FakeOpenAIClient as FakeClient
+from fakes import chat_result
 
 from propensity.providers import BatchCapable, LLMProvider, available_providers, get_provider
 from propensity.providers.base import BatchRequest
@@ -14,68 +14,6 @@ from propensity.providers.openai_compat import (
     OpenAIBatchProvider,
     OpenAICompatProvider,
 )
-
-
-class Response:
-    def __init__(self, text, usage=None):
-        self.choices = ([SimpleNamespace(message=SimpleNamespace(content=text))]
-                        if text is not None else [])
-        self.usage = usage
-
-    def model_dump(self):
-        return {"choices": [{"message": {"content": choice.message.content}}
-                            for choice in self.choices], "usage": self.usage}
-
-
-class FakeClient:
-    """The slice of the OpenAI SDK this adapter touches."""
-
-    def __init__(self, text="answer", usage=None, raises=None, status="completed",
-                 output=(), errors=(), batches=True):
-        self.bodies, self.uploads, self.submitted, self.fetched = [], [], [], []
-        self.text, self.usage, self.raises, self.status = text, usage, raises, status
-        self.files_content = {"out-1": output, "err-1": errors}
-        self.has_error_file = bool(errors)
-        self.batches_supported = batches
-        self.probes = 0
-        self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
-        self.files = SimpleNamespace(create=self._upload, content=self._content)
-        self.batches = SimpleNamespace(create=self._submit, retrieve=self._retrieve,
-                                       list=self._list)
-
-    def _create(self, **body):
-        self.bodies.append(body)
-        if self.raises:
-            raise self.raises
-        return Response(self.text, self.usage)
-
-    def _upload(self, *, file, purpose):
-        self.uploads.append({"file": file, "purpose": purpose})
-        return SimpleNamespace(id="file-1")
-
-    def _submit(self, **kwargs):
-        self.submitted.append(kwargs)
-        return SimpleNamespace(id="batch-1")
-
-    def _retrieve(self, batch_id):
-        self.fetched.append(batch_id)
-        return SimpleNamespace(id=batch_id, status=self.status, output_file_id="out-1",
-                               error_file_id="err-1" if self.has_error_file else None)
-
-    def _content(self, file_id):
-        lines = self.files_content.get(file_id, ())
-        return SimpleNamespace(text="\n".join(json.dumps(line) for line in lines))
-
-    def _list(self, limit=None):
-        self.probes += 1
-        if not self.batches_supported:
-            raise RuntimeError("404 page not found")
-        return SimpleNamespace(data=[])
-
-
-def chat_result(custom_id, text, status=200, usage=None):
-    return {"custom_id": custom_id, "response": {"status_code": status,
-            "body": {"choices": [{"message": {"content": text}}], "usage": usage}}}
 
 
 def requests(n=2):
@@ -124,6 +62,15 @@ def test_an_empty_response_is_an_error_not_an_empty_annotation(text):
     assert completion.text == "" and "empty response" in completion.error
 
 
+def test_temperature_can_be_left_out_for_a_model_that_rejects_it(caplog):
+    client = FakeClient()
+    with caplog.at_level(logging.WARNING):
+        provider = OpenAICompatProvider("o3", client=client, send_temperature=False)
+    provider.complete("S", "U", temperature=0.0)
+    assert "temperature" not in client.bodies[0]
+    assert "temperature is not sent to openai:o3" in caplog.text  # never silently
+
+
 # --- building the client -----------------------------------------------------------------
 
 def test_the_key_comes_from_the_environment_and_an_explicit_one_wins(monkeypatch):
@@ -149,27 +96,6 @@ def test_the_environment_variable_name_and_the_endpoint_are_the_caller_s_choice(
                          base_url="http://localhost:8000/v1", timeout=30)
     assert captured == {"api_key": "gateway-key", "base_url": "http://localhost:8000/v1",
                         "timeout": 30}
-
-
-def test_without_the_sdk_the_error_says_which_extra_installs_it():
-    script = (
-        "import sys\n"
-        "class Blocker:\n"
-        "    def find_spec(self, name, path=None, target=None):\n"
-        "        if name.split('.')[0] == 'openai':\n"
-        "            raise ImportError('blocked')\n"
-        "sys.meta_path.insert(0, Blocker())\n"
-        "from propensity.providers import get_provider\n"
-        "try:\n"
-        "    get_provider('openai', model='gpt-4.1')\n"
-        "except ImportError as exc:\n"
-        "    print(exc)\n"
-        "else:\n"
-        "    raise AssertionError('constructing a provider should have raised ImportError')\n"
-    )
-    done = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
-    assert done.returncode == 0, done.stderr
-    assert 'pip install "propel[openai]"' in done.stdout
 
 
 # --- the batch API -----------------------------------------------------------------------

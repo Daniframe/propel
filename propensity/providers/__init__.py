@@ -38,4 +38,11 @@ def get_provider(name: str, **kwargs):
     return factory(**kwargs)
 
 
-from . import mock, openai_compat  # noqa: E402  imported for their self-registration
+from . import (  # noqa: E402  imported for their self-registration
+    anthropic,
+    azure_openai,
+    generic_http,
+    google,
+    mock,
+    openai_compat,
+)

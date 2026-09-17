@@ -16,8 +16,8 @@ verifiable and nothing starts before the previous phase's tests pass.
 | 4 | `providers/base.py` + `mock.py` + registry (T9) | **Done** |
 | 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | **Done** |
 | 6 | `providers/openai_compat.py` and a live 20-instance check | Adapter **done**; live check run on llama3 — pipeline passed, rubric verdict needs a stronger model |
-| 7 | The remaining adapters and the native batch paths | Planned |
-| 8 | `plotting.py` and the documentation pass | Planned |
+| 7 | The remaining adapters and the native batch paths | **Done**; no live call made to any of them |
+| 8 | `plotting.py` and the documentation pass | Next |
 
 Every phase ends with the full test suite green and a stop for review. Commits are the user's.
 
@@ -313,13 +313,97 @@ On the ≤120-line rule for adapters: this file is 136 lines and `mock.py` is 14
 lines of code — the rest is docstrings and the blank lines PEP 8 asks for. The rule exists to
 catch a leaking abstraction, so the line-count test in Phase 7 will measure code lines.
 
-## Phase 7 — The remaining adapters · Planned
+## Phase 7 — The remaining adapters · Done
 
-`azure` (subclass; `model` is the deployment name), `anthropic` (top-level `system`, a default
-`max_tokens`, Message Batches, and a clear error when a `question_id` does not fit Anthropic's
-`custom_id` pattern), `google` (`system_instruction`, no batch) and `generic_http` (httpx plus
-`build_payload` and `extract_text`). Each gets a fake-client test, T7 is re-run for every
-batch-capable adapter, and a test asserts each adapter file is at most 120 lines.
+Four more adapters, each registering itself and importing its SDK lazily. All vendor-specific
+choices were checked against current vendor documentation and against the installed SDKs
+(openai 3.14, anthropic 1.6, google-genai 2.24).
+
+- [azure_openai.py](propensity/providers/azure_openai.py): a subclass of the OpenAI adapter.
+  - `model` is the deployment name.
+  - It talks to Azure's v1 API at `{endpoint}/openai/v1/` through the plain OpenAI client, as
+    Microsoft now documents. `api_version` switches to `AzureOpenAI` for a resource still on
+    dated API versions.
+  - The endpoint comes from `endpoint=` or `AZURE_OPENAI_ENDPOINT`, and the key from
+    `AZURE_OPENAI_API_KEY`. A missing endpoint is named before any call.
+  - It is batch-capable by default and never probed, because a probe cannot tell a Global Batch
+    deployment from a standard one. `batch=False` opts a standard deployment out.
+  - Batch lines carry `"url": "/v1/chat/completions"`, while `batches.create` is told
+    `/chat/completions`.
+- [anthropic.py](propensity/providers/anthropic.py):
+  - `system` is a top-level parameter.
+  - `max_tokens` defaults to **16000**, not the planned 4096: current models think before
+    answering, the thinking counts against `max_tokens`, and 16000 stays under the SDK's limit
+    for non-streaming calls.
+  - Message Batches are on by default. A `question_id` outside `^[a-zA-Z0-9_-]{1,64}$` is refused
+    before anything is sent.
+  - Errored, cancelled and expired batch results become error rows. A `refusal` or `max_tokens`
+    stop becomes an error, with the text kept in `raw`.
+  - Server-side model fallbacks are deliberately not enabled: they would swap the annotating
+    model and make the `annotator` field false.
+  - In SDK 1.x `temperature` is no longer a keyword of `messages.create()` (passing it is a
+    `TypeError`), though the API still takes it. The adapter sends it through `extra_body`, which
+    puts the same JSON on the wire; batch params carry it directly.
+- [google.py](propensity/providers/google.py):
+  - The system part travels as `system_instruction`.
+  - The SDK's automatic function-calling loop is switched off: no tools are passed, and with it
+    on, every call goes through that loop and the SDK logs a warning.
+  - An empty response names its finish reason (`SAFETY`, `MAX_TOKENS`).
+  - Not batch-capable.
+- [generic_http.py](propensity/providers/generic_http.py): a URL, extra headers, and a bearer
+  key from `api_key` or `api_key_env`.
+  - `build_payload` and `extract_text` are callables, or `"module:function"` strings so they can
+    come from YAML or `--provider-option`.
+  - Every failure comes back as a `Completion`: HTTP status, bad JSON, or an unexpected shape.
+  - Not batch-capable.
+
+**Temperature, a deviation from §8 made explicit.** §8 fixes temperature at 0, but current models
+refuse it:
+- Anthropic's Opus 4.7 and later and Fable return a 400 for any temperature, and Sonnet 5 for any
+  value other than the default.
+- OpenAI's reasoning models accept only the default.
+
+Every adapter now takes `send_temperature`:
+- **By default it is `True`.** §8 holds, and a model that rejects temperature fails loudly as
+  provider-error rows.
+- **`send_temperature=False` leaves temperature out** and logs a warning that intervals may vary
+  between reruns.
+
+Nothing drops temperature silently. The OpenAI adapter also gained `batch_endpoint`, for Azure,
+and an extra-specific install hint.
+
+**Tests:** 72 new, 362 in total, all green with warnings as errors. In the environment with no
+vendor SDK and pandas 2, 351 pass and 11 skip, and every skip is a test that drives a real SDK.
+- [tests/fakes.py](tests/fakes.py) has fake clients for all four SDK shapes. Batch output is
+  built from what was actually submitted, then shuffled.
+- One test file per adapter covers request shape, credentials from the environment, and every
+  failure and batch-status path.
+- One test per adapter drives the **real installed SDK over an in-memory `MockTransport`** and
+  asserts the wire JSON, URL path and auth header. This catches wrong SDK usage that fakes cannot,
+  such as the `temperature` removal above.
+- [tests/test_adapters.py](tests/test_adapters.py):
+  - the registry lists all six adapters, and `isinstance(p, BatchCapable)` is truthful for each;
+  - **T7** for openai, azure and anthropic through `annotate()`: identical rows, including a parse
+    failure, and identical request JSON on both paths, while the batch output comes back out of
+    order;
+  - **T9** adapter by adapter: with every SDK blocked, each module still imports, and constructing
+    each adapter raises an `ImportError` naming its own extra;
+  - the **line budget**: at most 120 code lines, counting every physical line of a statement but
+    no docstrings, comments or blanks. The counter has its own test. The mock fits the budget, so
+    it is measured with the rest rather than exempted as Phase 5 proposed.
+
+| Adapter | Lines | Code lines |
+|---|---|---|
+| `openai_compat.py` | 149 | 106 |
+| `mock.py` | 148 | 96 |
+| `anthropic.py` | 125 | 87 |
+| `google.py` | 72 | 48 |
+| `generic_http.py` | 69 | 44 |
+| `azure_openai.py` | 53 | 29 |
+
+**Not verified:** none of the four has made a live call. Their request and batch shapes are checked
+against current documentation and the real SDKs only, so a first run on each should be small, with
+credentials.
 
 ## Phase 8 — Plotting and documentation · Planned
 
