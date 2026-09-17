@@ -16,6 +16,9 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[project.scripts]
+propel-fit = "propensity.cli.fit:main"
+
 [project.optional-dependencies]
 # One extra per provider SDK: installing one is never required to use another (CLAUDE.md §4.1).
 openai = ["openai>=1.40"]
