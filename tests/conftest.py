@@ -1,6 +1,9 @@
+import os
 import socket
 
 import pytest
+
+os.environ.setdefault("MPLBACKEND", "Agg")  # figures render off-screen; no window ever opens
 
 
 @pytest.fixture(autouse=True)

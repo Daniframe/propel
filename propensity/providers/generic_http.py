@@ -7,8 +7,11 @@ batch-capable. httpx is imported lazily.
 """
 
 import importlib
+import importlib.util
 import os
+from pathlib import Path
 
+from ..errors import ProviderError
 from . import register_provider
 from .base import Completion
 
@@ -16,8 +19,8 @@ from .base import Completion
 class GenericHTTPProvider:
     """Posts each prompt to `url` as the body `build_payload(system, user, model=...,
     temperature=..., max_tokens=...)` returns, and reads the answer with
-    `extract_text(response_json)`. Either callable can be given as a "module:function" path,
-    which is how `propel-annotate --provider-option` passes one. A key from `api_key` or
+    `extract_text(response_json)`. Either callable can be named by a "path/to/file.py:function"
+    or "module:function" string, which is how `propel-annotate` passes one. A key from `api_key` or
     `api_key_env` is sent as `Authorization: Bearer`; `headers` adds anything else."""
 
     name = "http"
@@ -59,11 +62,23 @@ class GenericHTTPProvider:
 
 
 def _resolve(function):
-    """A callable, or a "module:function" path to one."""
+    """A callable, or a string naming one: "path/to/file.py:function", or "module:function" for
+    a module on the import path. A console script does not put the working directory on that
+    path, so a file of your own is best named by its path."""
     if not isinstance(function, str):
         return function
-    module, _, attribute = function.partition(":")
-    return getattr(importlib.import_module(module), attribute)
+    source, _, attribute = function.rpartition(":")  # the last colon: C:\... paths have one too
+    try:
+        if source.endswith(".py"):
+            spec = importlib.util.spec_from_file_location(Path(source).stem, source)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        else:
+            module = importlib.import_module(source)
+        return getattr(module, attribute)
+    except (ImportError, OSError, AttributeError, ValueError) as exc:
+        raise ProviderError(f"the 'http' provider cannot load {function!r} ({type(exc).__name__}: "
+                            f"{exc}); name it as path/to/file.py:function or module:function") from None
 
 
 register_provider("http", GenericHTTPProvider)

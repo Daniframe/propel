@@ -1,6 +1,8 @@
 """propel-fit: annotations plus outcomes produce a propensity profile table (CLAUDE.md §6.5).
 
     propel-fit --annotations RA=annotations.jsonl --outcomes outcomes.csv --out profiles.csv
+    propel-fit ... --plots plots/      # also draw each cell's curve and surface, and each
+                                       # dimension's interval distribution and tree
 
 Each --annotations entry is either a path, for a file that names its own dimension, or
 CODE=path for a single-dimension file that does not. Settings come from config/modelling.yaml
@@ -16,6 +18,7 @@ import pandas as pd
 
 from ..errors import PropensityError
 from ..modelling.io import load_annotations, load_outcomes, write_table
+from ..modelling.plotting import require_matplotlib, save_annotation_plots, save_profile_plots
 from ..modelling.profiles import fit_profiles
 from . import load_config
 
@@ -38,6 +41,9 @@ def build_parser():
     parser.add_argument("--likelihood", choices=("sum", "product"),
                         help="'product' only to reproduce published numbers (§9.2)")
     parser.add_argument("--no-robust", action="store_true", help="a single fit attempt, no guarded restarts")
+    parser.add_argument("--plots", metavar="DIR",
+                        help="also draw every cell's propensity curve and surface, and every "
+                             'dimension\'s interval distribution and tree, into DIR (needs "propel[plot]")')
     parser.add_argument("--config", default=DEFAULT_CONFIG, help=f"settings file (default: {DEFAULT_CONFIG})")
     return parser
 
@@ -103,6 +109,12 @@ def main(argv=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s", stream=sys.stderr)
     args = build_parser().parse_args(argv)
     fit_kwargs, min_items = resolve_settings(args)
+    if args.plots:
+        try:
+            require_matplotlib()  # before the fit, not after it has run
+        except ImportError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
     try:
         annotations = read_annotations(args.annotations)
         outcomes = load_outcomes(args.outcomes)
@@ -117,6 +129,12 @@ def main(argv=None):
         print(f"error: {exc}", file=sys.stderr)
         return 2
     report(profiles, args.out)
+    if args.plots:
+        written = save_profile_plots(profiles, annotations, outcomes, args.plots,
+                                     n_bins=fit_kwargs.get("n_bins", 20),
+                                     lowess_frac=fit_kwargs.get("lowess_frac", 0.4))
+        written += save_annotation_plots(annotations, args.plots, dimensions=args.dimensions)
+        print(f"wrote {len(written)} plots to {args.plots}")
     return 0
 
 

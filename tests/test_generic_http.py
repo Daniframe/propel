@@ -5,6 +5,7 @@ import json
 import pytest
 from fakes import FakeHTTPClient
 
+from propensity.errors import ProviderError
 from propensity.providers import BatchCapable, LLMProvider, get_provider
 from propensity.providers.generic_http import GenericHTTPProvider
 
@@ -50,6 +51,25 @@ def test_the_callables_can_be_named_as_module_paths():
                                   extract_text="test_generic_http:extract_text")
     assert by_name.complete("S", "U").text == "ok"
     assert client.posts[0]["json"]["prompt"] == "SU"
+
+
+def test_the_callables_can_be_named_by_file_path_even_with_a_drive_letter(tmp_path):
+    formats = tmp_path / "house_format.py"  # absolute, so "C:\..." on Windows: two colons
+    formats.write_text("def build(system, user, **settings):\n    return {'q': user}\n\n"
+                       "def read(response):\n    return response['a']\n", encoding="utf-8")
+    client = FakeHTTPClient({"a": "from a file"})
+    by_path = GenericHTTPProvider("m", url=URL, client=client, build_payload=f"{formats}:build",
+                                  extract_text=f"{formats}:read")
+    assert by_path.complete("S", "U").text == "from a file"
+    assert client.posts[0]["json"] == {"q": "U"}
+
+
+@pytest.mark.parametrize("name", ["no_such_module_anywhere:build", "test_generic_http:missing",
+                                  "missing_file.py:build", "no colon at all"])
+def test_a_callable_that_cannot_be_loaded_is_named_in_a_clear_error(name):
+    with pytest.raises(ProviderError, match="cannot load .*file.py:function or module:function"):
+        GenericHTTPProvider("m", url=URL, client=FakeHTTPClient(), build_payload=name,
+                            extract_text=extract_text)
 
 
 @pytest.mark.parametrize("client,expected", [

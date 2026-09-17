@@ -17,7 +17,7 @@ verifiable and nothing starts before the previous phase's tests pass.
 | 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | **Done** |
 | 6 | `providers/openai_compat.py` and a live 20-instance check | Adapter **done**; live check run on llama3 — pipeline passed, rubric verdict needs a stronger model |
 | 7 | The remaining adapters and the native batch paths | **Done**; no live call made to any of them |
-| 8 | `plotting.py` and the documentation pass | Next |
+| 8 | `plotting.py` and the documentation pass | **Done** |
 
 Every phase ends with the full test suite green and a stop for review. Commits are the user's.
 
@@ -405,18 +405,141 @@ vendor SDK and pandas 2, 351 pass and 11 skip, and every skip is a test that dri
 against current documentation and the real SDKs only, so a first run on each should be small, with
 credentials.
 
-## Phase 8 — Plotting and documentation · Planned
+## Phase 8 — Plotting and documentation · Done
 
-Port both renderers with guarded imports, so importing `propensity.modelling` never needs
-matplotlib. The curve jitters by ±0.25 for display only; the surface shows its three cell states.
-Add `propel-fit --plots DIR`. The README then covers installation, both entry points, the data
-contracts, how to add a provider, the §14.1 validation requirement, the rubric gaps and the
-missing TD rubric.
+[plotting.py](propensity/modelling/plotting.py) draws the plain structures from `curves.py`,
+`surfaces.py` and the fit, and imports matplotlib and seaborn only when it draws. Importing
+`propensity.modelling` still needs neither, and T9 still blocks both while importing it. Drawing
+without them raises an `ImportError` naming `pip install "propel[plot]"`, as the adapters do.
+
+- **`plot_propensity_curve`** (§10.1): binned success against interval centre, the LOWESS
+  smooth, a solid line at theta and dashed lines at its confidence bounds, and the incited level
+  in grey when given. The x-axis widens to keep jittered bins and an out-of-range estimate in view.
+- **`plot_propensity_surface`** (§10.2): the three cell states stay distinct. Observed cells are
+  coloured red to green and show their count, valid but unobserved cells are whitesmoke, and
+  impossible cells are blank. `b_u` grows upwards, and the `b_l + b_u = 2θ` lines are clipped to
+  the grid exactly rather than sampled. The legend sits below the axes: inside them, the θ̂ line
+  of some mid-range estimate always ran underneath it. An estimate off the grid (|θ̂| > 3.5)
+  draws no line but still gets its legend entry, so its value is never lost.
+- **Non-converged fits** get "(the fit did not converge)" beside the estimate on both plots,
+  since §9.6 forbids showing a tight interval without its convergence status.
+- **`save_profile_plots(profiles, annotations, outcomes, out_dir)`** writes
+  `{subject}_{dimension}_curve.png` and `..._surface.png` for every cell with joined data.
+  - Unfitted cells are drawn too, without an estimate and with the skip reason in the title,
+    because a surface is how a bank with no informative cells is caught.
+  - It renders through `Figure` and the Agg canvas, so no display or GUI backend is needed.
+  - Filenames are made safe but keep signed levels such as `_+2`, and colliding names get a
+    suffix.
+  - A plot that fails is logged and skipped; the rest carry on.
+- **`propel-fit --plots DIR`** checks for matplotlib before fitting, so a long fit never fails at
+  its last step.
+
+Deviations and fixes:
+- Drawing the paper's RiskAv surfaces with warnings as errors caught an estimate off the grid
+  whose confidence bound was on it. Only the unlabelled dashed bound was drawn, so the legend
+  warned and the θ̂ value appeared nowhere. Fixed as above, with a test for that case.
+- The neurips renderer's `cmap.set_under` is pending deprecation in matplotlib 3.11, which a run
+  with warnings as errors caught. It is now `with_extremes(under=...)`, and the `plot` extra is
+  pinned to `matplotlib>=3.5` and `seaborn>=0.12`.
+- The README's `http` example exposed a real bug: a console script does not put the working
+  directory on `sys.path`, so `myformat:build_payload` could not be found and the CLI crashed with
+  a traceback. `generic_http` now also accepts `path/to/file.py:function`, splitting on the last
+  colon so Windows drive letters work. A name that cannot be loaded raises a `ProviderError`,
+  which the CLI prints as one line. This puts `generic_http.py` at 57 code lines.
+
+[README.md](README.md) was rewritten for people using the pipeline. It covers installation and
+extras, a quick start, the annotation CLI (run versus submit, status and fetch), the provider
+table with credentials, batching and temperature, the data contracts, the fit CLI, the profile
+columns, the diagnostics and their thresholds, reading the plots, the §14.1 validation
+requirement, the Python API, adding a provider, and the rubric gaps and missing TD. Every command
+and name in it was checked against the code.
+
+**Tests:** 23 new, 385 in total, all green with warnings as errors. With no vendor SDK, no
+matplotlib and pandas 2, 358 pass and 27 skip. With matplotlib added to that environment, the
+plotting, fit CLI and provider tests all pass under pandas 2 as well.
+- [tests/test_plotting.py](tests/test_plotting.py) inspects the drawn artists rather than
+  comparing images. It checks each cell's state and colour, that only observed cells carry
+  counts, the axis orientation, that the estimate lines satisfy `b_l + b_u = 2θ` and reach the
+  grid edge, the convergence label, unfitted and empty cells, filename collisions, and failure
+  isolation.
+- The fit CLI tests cover `--plots` writing every cell, and failing before the fit when matplotlib
+  is missing.
+- The `generic_http` tests cover the file-path form, with a Windows drive letter, and the clear
+  error.
+
+**Checked by hand:** `propel-annotate` run, submit, status and fetch through the installed console
+scripts with the mock, and `propel-fit --plots` on the paper's local RiskAv data: 96 cells and
+192 figures in under a minute. The figures were inspected. Incited `+2` fits at 2.27 and `-2` at
+-1.94, and the surfaces show at a glance how few cells that bank covers.
+
+### Addendum: the figures from `visualisations.py`
+
+The user's `visualisations.py`, which is untracked, had four more figures. Each is now in the
+package, split the way the curve and surface already are: data in
+[surfaces.py](propensity/modelling/surfaces.py) and drawing in
+[plotting.py](propensity/modelling/plotting.py). No module was added, so the §5 layout stands.
+
+| `visualisations.py` | Now |
+|---|---|
+| `interval_distribution` | `build_interval_distribution` + `plot_interval_distribution` |
+| `interval_distribution_xmas` | `build_interval_tree` + `plot_interval_tree` |
+| `interval_distribution_xmas_grid`, `_best_grid` | `plot_interval_trees`, `_layout` (same rule: fewest empty slots, then squarest, then fewest rows) |
+| `theoretical_subject_propensity_surface`, `propensity_probability` | `build_model_surface` + `plot_model_surface` |
+
+What changed on the way in:
+- **One set of drawing conventions.** Every grid now follows the empirical surface: `b_l`, or
+  the interval centre, across; `b_u`, or the length, up; and the three cell states (occupied and
+  labelled, valid but empty in whitesmoke, impossible blank). A shared helper draws all four
+  heatmaps, and a shared renderer writes every file off-screen.
+- **The tree's unreachable cells are blank.** An integer interval with an even length has a
+  whole centre, and one with an odd length a half. The original showed the other cells as 0.00,
+  as if they could have been occupied. At the user's request, `show_invalid=True` fills them
+  light grey instead, the original's fill for masked cells. They stay unlabelled and distinct
+  from empty valid cells (whitesmoke). The option passes through `plot_interval_trees` and
+  `save_annotation_plots`.
+- **The model surface is Eq. 5 itself.** `propensity_probability` equals `two_sided_sigma` to
+  within 6e-16, but it had no width floor and divided by zero at `b_l = b_u`, which is why the
+  original left the diagonal out. `build_model_surface` calls `two_sided_sigma`, so it is exactly
+  the model the fit uses, diagonal included. It uses the empirical surface's red-to-green scale
+  rather than viridis. At the user's request it takes `smooth`:
+  - `False`, the default: the empirical surface's integer grid, drawn as cells, cell for cell.
+  - `True`: a continuous grid every `resolution` (0.05), drawn as filled contours with labelled
+    lines at 0.25, 0.5 and 0.75.
+
+  The flag travels with the data, so `plot_model_surface` draws whichever it is given.
+- **Distributions keep the original's `Reds` scale** and its share-of-bank values, labelled in
+  occupied cells. A share that would print as 0.00 shows as `<.01`.
+- **Bugs not carried over:**
+  - `plt.cm.get_cmap`, removed in matplotlib 3.9, so the script no longer ran on the installed
+    3.11;
+  - a duplicated `imshow` in the distribution plot;
+  - the grid's shared maximum ignoring the level range and the proportion or count choice;
+  - one-row and one-column grids breaking the axes handling;
+  - unused grid slots left as empty axes.
+- **`save_annotation_plots(annotations, out_dir)`** writes `{dimension}_intervals.png` and
+  `{dimension}_tree.png` for each dimension, plus `interval_trees.png` when there are several.
+  Rows that failed to parse are excluded, as in the fit. `propel-fit --plots` now calls it too.
+
+**Tests:** 34 new, including `smooth` and `show_invalid`, 420 in total, all green with warnings
+as errors. With minimal dependencies, 375 pass and 45 skip.
+- The builders are checked against hand counts. The tree has exactly 28 reachable cells, the valid
+  pairs on a 7-level grid, and it agrees with the bounds view cell for cell on a random bank. The
+  model surface equals `two_sided_sigma` at every valid interval and peaks at 1 on intervals
+  centred on theta.
+- The renderers are checked through their artists: cell states, labels, `<.01`, scale and
+  orientation. The model surface has the same colours and cell edges as the empirical surface,
+  several trees share one `vmax` and one colour bar, and empty grid slots are removed.
+- Saving is checked for per-dimension files, the grid only with several dimensions, the
+  dimension filter, excluded parse failures, and failure isolation.
+
+**Checked by hand:** trees, distributions and the tree grid for the paper's four GPT-4.1
+annotation files, and model surfaces at steps 0.05 and 1, all inspected as images.
 
 ## Verification
 
-- **Tests:** `C:\Users\Daniel\.venvs\propel\Scripts\python.exe -m pytest -q` after every phase.
-  No network (enforced by the socket blocker), no credentials, no GPU.
+- **Tests:** `C:\Users\Daniel\.venvs\propel\Scripts\python.exe -m pytest -q -W error` after every
+  phase. No network (enforced by the socket blocker), no credentials, no GPU. A second environment
+  with only the core dependencies and pandas 2 checks that the suite skips cleanly what it lacks.
 - **Offline end to end**, from Phase 5: `propel-annotate run --provider mock` over sample
   instances, then simulated outcomes from a known theta, then `propel-fit`, checking that the
   profile recovers theta and that the yield and diagnostics are printed.

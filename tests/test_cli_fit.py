@@ -130,3 +130,33 @@ def test_the_module_entry_point_is_runnable():
                           capture_output=True, text=True, check=False)
     assert done.returncode == 0
     assert "propel-fit" in done.stdout
+
+
+def test_plots_are_drawn_for_every_cell_when_asked(tmp_path, capsys):
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("seaborn")
+    write_inputs(tmp_path, legacy=False)
+    code, _ = run(tmp_path, "--plots", str(tmp_path / "plots"))
+    printed = capsys.readouterr().out
+
+    assert code == 0
+    assert sorted(p.name for p in (tmp_path / "plots").iterdir()) == [
+        "RA_intervals.png", "RA_tree.png",  # one dimension, so no grid of trees
+        "model-a_RA_curve.png", "model-a_RA_surface.png",
+        "model-b_RA_curve.png", "model-b_RA_surface.png"]
+    assert f"wrote 6 plots to {tmp_path / 'plots'}" in printed
+
+
+def test_plots_without_matplotlib_fail_before_anything_is_fitted(tmp_path, capsys, monkeypatch):
+    import propensity.cli.fit as fit_cli
+
+    def missing():
+        raise ImportError('plotting needs matplotlib and seaborn: pip install "propel[plot]"')
+
+    monkeypatch.setattr(fit_cli, "require_matplotlib", missing)
+    write_inputs(tmp_path, legacy=False)
+    code, out = run(tmp_path, "--plots", str(tmp_path / "plots"))
+
+    assert code == 2
+    assert 'pip install "propel[plot]"' in capsys.readouterr().err
+    assert not out.exists() and not (tmp_path / "plots").exists()
