@@ -15,7 +15,7 @@ verifiable and nothing starts before the previous phase's tests pass.
 | 3 | `curves.py`, `surfaces.py`, `profiles.py`, the `fit` entry point | **Done** |
 | 4 | `providers/base.py` + `mock.py` + registry (T9) | **Done** |
 | 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | **Done** |
-| 6 | `providers/openai_compat.py` and a live 20-instance check | **Next**, needs credentials |
+| 6 | `providers/openai_compat.py` and a live 20-instance check | Adapter **done**; live check run on llama3 — pipeline passed, rubric verdict needs a stronger model |
 | 7 | The remaining adapters and the native batch paths | Planned |
 | 8 | `plotting.py` and the documentation pass | Planned |
 
@@ -277,15 +277,41 @@ Two things this phase changed outside its own scope:
   write the rows, load them back, draw outcomes for two subjects at known levels, and fit. Both
   levels come back within 0.25, and the run warns about nothing.
 
-## Phase 6 — `openai_compat` and the live check · Next
+## Phase 6 — `openai_compat` and the live check · Adapter done, rubric check open
 
-Lazy `import openai`. The constructor takes `model`, `api_key`, `api_key_env`, `base_url` and an
-injectable `client` for tests; `complete` never raises. The batch class uses Files + Batches, maps
-provider states onto `BatchState`, and folds the error file into error completions.
+[openai_compat.py](propensity/providers/openai_compat.py) ships two classes so that
+`isinstance(p, BatchCapable)` stays truthful: `OpenAICompatProvider` for one call at a time and
+`OpenAIBatchProvider` for Files plus Batches. The SDK is imported lazily inside the constructor,
+so the module imports without `openai` present and the `ImportError` names the extra that
+installs it. `complete` never raises: a provider exception comes back as a `Completion` with
+`error` set, and so does an empty response. `base_url` points the same adapter at a self-hosted
+server or a gateway, `api_key_env` chooses the environment variable, and `request_options` is
+merged into every request for a model that wants something else, such as
+`max_completion_tokens`.
 
-**Needs the user:** an API key or a self-hosted `base_url`, a model name and an instances file.
-Twenty instances are annotated sequentially and every explanation is read by hand, which is where
-rubric defects surface. No paid call happens without asking first.
+`get_provider("openai", batch=None)` skips the probe for the official endpoint, which has a
+batch API, and probes a custom `base_url` once with `batches.list(limit=1)` rather than
+discovering at submit time that there is none.
+
+Tests: 27 new, 290 in total, all against a fake client standing in for the slice of the SDK the
+adapter touches. They cover the request body, the failure paths, client construction from the
+environment, every batch status mapping, the error file being folded into rows, and the probe
+being called exactly once — and never for the official endpoint. The two tests that need the
+real SDK skip when it is absent, so the suite stays green with no vendor package installed.
+
+**The live check ran locally on 2026-09-17**, with `llama3:latest` (8B) through Ollama and nothing
+spent; `live_check/REVIEW.md` (kept local and untracked) has the full write-up and every explanation.
+The pipeline passed: 20 of 20 completed and parsed, and the legacy fallbacks recovered the five
+responses that broke the output contract. The model did not: its "unbiased option" was the first
+guaranteed option listed in 19 of 20 items, so it never did the expected-value arithmetic the
+rubric presupposes, and the run cannot say anything about rubric quality. The one rubric point
+it prompted is an asymmetry in the RA ±1 worked examples (20% at level −1, 10% at level +1). The
+rubric check stays open: it needs a model that can do the arithmetic, and GPT-4.1 on the same 20
+items would be the most informative, since the published annotations came from it.
+
+On the ≤120-line rule for adapters: this file is 136 lines and `mock.py` is 148, but both are 93
+lines of code — the rest is docstrings and the blank lines PEP 8 asks for. The rule exists to
+catch a leaking abstraction, so the line-count test in Phase 7 will measure code lines.
 
 ## Phase 7 — The remaining adapters · Planned
 
