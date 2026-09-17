@@ -4,6 +4,9 @@ neurips/
 # Data for reproducibility purposes, never commited
 reproducibility/
 
+# Local runs against real models, never committed
+live_check/
+
 # Python
 __pycache__/
 *.py[cod]
