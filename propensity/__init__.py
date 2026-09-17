@@ -20,3 +20,12 @@ from .modelling import (
     two_sided_sigma,
     write_table,
 )
+from .providers import (
+    BatchCapable,
+    BatchRequest,
+    Completion,
+    LLMProvider,
+    available_providers,
+    get_provider,
+    register_provider,
+)

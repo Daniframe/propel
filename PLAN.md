@@ -13,8 +13,8 @@ verifiable and nothing starts before the previous phase's tests pass.
 | 2 | `modelling/io.py` — loaders, validators, join (T10–T12) | **Done** |
 | — | Reproducibility data and a reproduction of the paper's Tables 2 and 3 | **Done** (out of band) |
 | 3 | `curves.py`, `surfaces.py`, `profiles.py`, the `fit` entry point | **Done** |
-| 4 | `providers/base.py` + `mock.py` + registry (T9) | **Next** |
-| 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | Planned |
+| 4 | `providers/base.py` + `mock.py` + registry (T9) | **Done** |
+| 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | **Next** |
 | 6 | `providers/openai_compat.py` and a live 20-instance check | Planned, needs credentials |
 | 7 | The remaining adapters and the native batch paths | Planned |
 | 8 | `plotting.py` and the documentation pass | Planned |
@@ -210,15 +210,32 @@ fits is a change to §9.4, so it is left for the user to decide.
 `reproducibility/reproduce.py` exactly (largest difference 0.00 across the 384 published cells),
 so `fit_profiles` subsumes that script's loop.
 
-## Phase 4 — Providers: protocol, registry and mock (T9) · Next
+## Phase 4 — Providers: protocol, registry and mock (T9) · Done
 
-`base.py` exactly as in §4.2, and a registry with `get_provider`, `register_provider` and
-`available_providers`. `MockProvider` (sequential only) and `MockBatchProvider` ship in the
-package, take a fixed, per-ID or callable response, and record every `(system, user)` they
-receive; the batch one can scramble output order, drop IDs, add unknown IDs and inject errors.
-T9 runs in a subprocess with a meta-path blocker for every vendor SDK.
+- [base.py](propensity/providers/base.py): `Completion`, `BatchRequest`, `BatchState` and the
+  `LLMProvider` / `BatchCapable` protocols, exactly as §4.2 defines them. Both are
+  `runtime_checkable`, so `isinstance` sorts batch-capable providers from the rest; `issubclass`
+  raises on a protocol with data members, so nothing uses it.
+- [providers/__init__.py](propensity/providers/__init__.py): the registry —
+  `register_provider`, `get_provider` and `available_providers`. Adapter modules register
+  themselves as they are imported, so adding one changes no core module, and an unknown name
+  raises `ProviderError` listing what is available. Nothing is cached and nothing is shared, so
+  two providers coexist in one process.
+- [mock.py](propensity/providers/mock.py): `MockProvider` (sequential only) and
+  `MockBatchProvider` (batch-capable), shipped in the package rather than the tests. Responses
+  can be a fixed string, a mapping, a callable or a prebuilt `Completion`, keyed by the prompt
+  so that the sequential and batch paths answer identically. The mock records every
+  `(system, user)` it receives and counts attempts per key; `transient_failures` exercises
+  bounded retry; the batch one scrambles result order, drops ids, invents unknown ids, and can
+  walk a scripted sequence of poll states or fail outright.
+- Tests: 25 new, 190 in total. **T9** runs in a subprocess with a meta-path blocker for openai,
+  anthropic, google, httpx, matplotlib and seaborn, and first proves the blocker bites so the
+  test cannot pass merely because an SDK is absent.
 
-## Phase 5 — Annotation (T7–T8) · Planned
+The other half of T9, an `ImportError` naming the extra that installs a missing SDK, arrives
+with the first real adapter in Phase 6; there is no vendor code to exercise it yet.
+
+## Phase 5 — Annotation (T7–T8) · Next
 
 - `build_annotation_prompt` follows §7.3 byte for byte, with `as_single_string` for providers
   that accept one field.
