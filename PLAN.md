@@ -12,8 +12,8 @@ verifiable and nothing starts before the previous phase's tests pass.
 | 1 | `modelling/model.py` + `mle.py` — the response model and the fit (T1–T6) | **Done** |
 | 2 | `modelling/io.py` — loaders, validators, join (T10–T12) | **Done** |
 | — | Reproducibility data and a reproduction of the paper's Tables 2 and 3 | **Done** (out of band) |
-| 3 | `curves.py`, `surfaces.py`, `profiles.py`, the `fit` entry point | **Next** |
-| 4 | `providers/base.py` + `mock.py` + registry (T9) | Planned |
+| 3 | `curves.py`, `surfaces.py`, `profiles.py`, the `fit` entry point | **Done** |
+| 4 | `providers/base.py` + `mock.py` + registry (T9) | **Next** |
 | 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | Planned |
 | 6 | `providers/openai_compat.py` and a live 20-instance check | Planned, needs credentials |
 | 7 | The remaining adapters and the native batch paths | Planned |
@@ -58,9 +58,9 @@ gratification", set in `config/annotation.yaml`.
 Chosen while building, all still open to revision:
 
 1. **Layout.** The flat §5 layout sits at the repo root. The only additions are `pyproject.toml`,
-   `tests/conftest.py` and an empty `propensity/cli/__init__.py` when the CLIs land. The
-   distribution is `propel`, the import is `propensity`, and the console scripts will be
-   `propel-annotate` and `propel-fit`.
+   `tests/conftest.py` and `propensity/cli/__init__.py`, which holds the YAML settings loader
+   both entry points share. The distribution is `propel`, the import is `propensity`, and the
+   console scripts are `propel-annotate` and `propel-fit`.
 2. **Presentation block.** `rubrics/presentation.txt` became `rubrics/presentation.md` with the
    same bytes. `tests/test_rubric_files.py` pins the SHA-256 of every rubric file, so any edit,
    including an editor adding a final newline, fails until the change is made deliberately.
@@ -178,23 +178,39 @@ optimum. See `reproducibility/README.md` for the per-dataset breakdown and the f
 about the published tables. This also satisfies the §14.1 end-to-end check ahead of schedule: the
 data contains subjects incited to known levels, and the fits recover them.
 
-## Phase 3 — Curves, surfaces, profiles and `fit` · Next
+## Phase 3 — Curves, surfaces, profiles and `fit` · Done
 
-- `curves.py`: `build_empirical_curve`, with `jitter` as a float amplitude used only for display.
-- `surfaces.py`: `build_empirical_surface`, returning `prob`, `counts` and `grid`, with the three
-  cell states of §10.2 distinguishable.
-- `profiles.py`: `fit_profiles` sweeps every (subject, dimension) cell, catching failures per cell,
-  keeping cells under `min_items` with `theta = NaN` and a `skip_reason`, and refusing cells whose
-  `frac_orthogonal` exceeds 0.9. Plus `profile_vector`.
-- `propel-fit`: `--annotations PATH|CODE=PATH ... --outcomes F --out profiles.csv`, with
-  `--subjects`, `--dimensions`, `--min-items` and `--config`; prints the join yield and a
-  diagnostics summary. Declare the console scripts in `pyproject.toml` here.
-- Tests: the three surface cell states, multi-subject recovery, a failing cell not aborting the
-  sweep, and a CLI smoke test.
-- Now also possible: check `fit_profiles` against the real data in `reproducibility/`, which
-  should subsume the loop in `reproduce.py` and give identical numbers.
+- [curves.py](propensity/modelling/curves.py): `build_empirical_curve`, binned success by
+  interval centre plus a LOWESS smooth. `jitter` is a display-only amplitude, repeatable through
+  `seed`, and it never touches the caller's array. `mle._lowess_start` now delegates to this, so
+  the binning exists in one place.
+- [surfaces.py](propensity/modelling/surfaces.py): `build_empirical_surface`, returning
+  `prob`, `counts` and `grid` indexed by b_u against b_l, the orientation plotting will draw. It
+  rejects non-integer bounds and bounds off the grid, so the counts always account for every
+  observation, and the three §10.2 cell states follow from `counts` and the grid.
+- [profiles.py](propensity/modelling/profiles.py): `fit_profiles` and `profile_vector`. A cell
+  that cannot be fitted keeps its row with `theta = NaN` and a `skip_reason` (too few items, an
+  orthogonal bank, no joined instances, or a failed fit), and the join report rides along in
+  `profiles.attrs["join_report"]`.
+- [cli/fit.py](propensity/cli/fit.py) and [cli/__init__.py](propensity/cli/__init__.py) for the
+  shared YAML loading, wired as `propel-fit`. Flags override the config file, which overrides the
+  function defaults; the report goes to stdout and diagnostics to stderr, and a `ContractError`
+  exits 2 without a traceback.
+- Tests: 36 new, 165 in total, covering the three surface cell states, multi-subject recovery,
+  every skip path, a failing cell not aborting the sweep, and the CLI end to end.
 
-## Phase 4 — Providers: protocol, registry and mock (T9) · Planned
+**A new finding, and a new diagnostic.** A bank with many zero-width intervals leaves the
+likelihood with a peak about 0.1 wide at each integer level. A gradient method started outside
+that peak settles on a plateau and reports convergence, which produces a negative pseudo-R²:
+the fit explains the data worse than theta = 0 does. `fit_diagnostics` now says so, and on the
+paper's data it flags 17 of 392 cells. Whether `fit_theta` should also spend restarts on such
+fits is a change to §9.4, so it is left for the user to decide.
+
+**Real-data check.** `propel-fit` over the four paper datasets fits 392 cells and reproduces
+`reproducibility/reproduce.py` exactly (largest difference 0.00 across the 384 published cells),
+so `fit_profiles` subsumes that script's loop.
+
+## Phase 4 — Providers: protocol, registry and mock (T9) · Next
 
 `base.py` exactly as in §4.2, and a registry with `get_provider`, `register_provider` and
 `available_providers`. `MockProvider` (sequential only) and `MockBatchProvider` ship in the

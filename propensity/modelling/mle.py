@@ -4,9 +4,8 @@ CLAUDE.md §9.2–9.4 and §9.6, Eq. 6 of arXiv 2602.18182.
 
 import numpy as np
 from scipy.optimize import minimize
-from scipy.stats import binned_statistic
-from statsmodels.nonparametric.smoothers_lowess import lowess
 
+from .curves import build_empirical_curve
 from .model import two_sided_sigma
 
 P_CLIP = 1e-10
@@ -156,6 +155,11 @@ def fit_diagnostics(demands, success, fit=None) -> dict:
         warnings.append(f"success rate {outcome_rate:.1%} is near-degenerate")
     if fit is not None and not fit["convergence"]:
         warnings.append("fit did not converge; its confidence interval is not trustworthy")
+    pseudo_r2 = (fit or {}).get("pseudo_r2")
+    if pseudo_r2 is not None and np.isfinite(pseudo_r2) and pseudo_r2 < 0:
+        # Zero-width intervals make the likelihood spiky, and a gradient method can settle on a
+        # plateau outside the peak, reporting convergence all the same.
+        warnings.append(f"fit explains the data worse than theta = 0 (pseudo_r2 = {pseudo_r2:.2f})")
 
     return {
         "n_items": n_items,
@@ -185,16 +189,11 @@ def _as_arrays(demands, success):
 
 def _lowess_start(demands, success, n_bins, lowess_frac):
     """§9.3 step 1: argmax of the LOWESS-smoothed, binned success curve over interval centres."""
-    centres = (demands[:, 0] + demands[:, 1]) / 2
-    bin_means, edges, _ = binned_statistic(centres, success, statistic="mean", bins=n_bins)
-    bin_centres = (edges[:-1] + edges[1:]) / 2
-    finite = np.isfinite(bin_means) & np.isfinite(bin_centres)
-    if finite.sum() < 2:  # LOWESS needs at least two points
-        return float(np.median(centres))
-    smoothed = lowess(bin_means[finite], bin_centres[finite], frac=lowess_frac, it=0)
-    if not np.all(np.isfinite(smoothed[:, 1])):
-        return float(np.median(centres))
-    return float(smoothed[np.argmax(smoothed[:, 1]), 0])
+    curve = build_empirical_curve(demands, success, n_bins=n_bins, lowess_frac=lowess_frac)
+    smoothed = curve["lowess_y"]
+    if len(smoothed) < 2 or not np.all(np.isfinite(smoothed)):  # nothing to take an argmax of
+        return float(np.median((demands[:, 0] + demands[:, 1]) / 2))
+    return float(curve["lowess_x"][np.argmax(smoothed)])
 
 
 def _standard_error(hess_inv):

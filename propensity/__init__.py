@@ -5,13 +5,17 @@ Public API re-exports only.
 
 from .errors import ContractError, DataWarning, ParseError, PropensityError, ProviderError
 from .modelling import (
+    build_empirical_curve,
+    build_empirical_surface,
     fit_diagnostics,
+    fit_profiles,
     fit_theta,
     join_annotations_outcomes,
     load_annotations,
     load_instances,
     load_outcomes,
     neg_log_likelihood,
+    profile_vector,
     read_table,
     two_sided_sigma,
     write_table,
