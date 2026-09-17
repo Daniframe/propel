@@ -17,6 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
+propel-annotate = "propensity.cli.annotate:main"
 propel-fit = "propensity.cli.fit:main"
 
 [project.optional-dependencies]
@@ -27,6 +28,7 @@ anthropic = ["anthropic"]
 google = ["google-genai"]
 http = ["httpx"]
 plot = ["matplotlib", "seaborn"]
+dotenv = ["python-dotenv"]
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]

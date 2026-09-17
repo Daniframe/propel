@@ -3,6 +3,13 @@
 Public API re-exports only.
 """
 
+from .annotation import (
+    annotate,
+    build_annotation_prompt,
+    load_presentation,
+    load_rubric,
+    parse_final_range,
+)
 from .errors import ContractError, DataWarning, ParseError, PropensityError, ProviderError
 from .modelling import (
     build_empirical_curve,

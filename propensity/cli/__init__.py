@@ -17,3 +17,16 @@ def load_config(path, section=None) -> dict:
     with open(path, encoding="utf-8") as f:
         settings = yaml.safe_load(f) or {}
     return dict(settings.get(section) or {}) if section else dict(settings)
+
+
+def load_dotenv_if_available() -> bool:
+    """Loads a .env file when python-dotenv is installed, for provider credentials.
+
+    Optional on purpose: the adapters read the environment, and how it got populated is not
+    their business. Returns whether anything was loaded.
+    """
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return False
+    return bool(load_dotenv())

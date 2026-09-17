@@ -14,8 +14,8 @@ verifiable and nothing starts before the previous phase's tests pass.
 | — | Reproducibility data and a reproduction of the paper's Tables 2 and 3 | **Done** (out of band) |
 | 3 | `curves.py`, `surfaces.py`, `profiles.py`, the `fit` entry point | **Done** |
 | 4 | `providers/base.py` + `mock.py` + registry (T9) | **Done** |
-| 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | **Next** |
-| 6 | `providers/openai_compat.py` and a live 20-instance check | Planned, needs credentials |
+| 5 | `annotation/` — rubrics, prompts, parsing, runner, the `annotate` entry point (T7–T8) | **Done** |
+| 6 | `providers/openai_compat.py` and a live 20-instance check | **Next**, needs credentials |
 | 7 | The remaining adapters and the native batch paths | Planned |
 | 8 | `plotting.py` and the documentation pass | Planned |
 
@@ -235,24 +235,49 @@ so `fit_profiles` subsumes that script's loop.
 The other half of T9, an `ImportError` naming the extra that installs a missing SDK, arrives
 with the first real adapter in Phase 6; there is no vendor code to exercise it yet.
 
-## Phase 5 — Annotation (T7–T8) · Next
+## Phase 5 — Annotation (T7–T8) · Done
 
-- `build_annotation_prompt` follows §7.3 byte for byte, with `as_single_string` for providers
-  that accept one field.
-- The parser tries `<FINAL_RANGE>` (last match), then the legacy phrase, then a bare bracket
-  (last match), and validates the bounds.
-- `runner.py`: `build_requests`, `run_sequential` (thread pool with retries), `submit`, `collect`
-  and `rows_from_completions`, with `annotate()` composing them. Both paths share the first and
-  last, so identical prompts and rows hold by construction and T7 checks it. Rows come back in
-  input order, with a summary line.
-- `propel-annotate` subcommands: `run` (always sequential); `submit [--wait]`, which writes
-  `<out>.job.json` *before* polling starts; `status --job`; and `fetch --job`, which rebuilds the
-  prompts and refuses if their hash drifted since submission.
-- Tests: T7 (scrambled order, unknown ID warns, missing ID becomes a provider-error row), T8, the
-  prompt byte layout, retry behaviour, `batch` on a non-batch provider raising, the `auto`
-  fallback being logged, and a CLI smoke run with `--provider mock`.
+- [rubrics.py](propensity/annotation/rubrics.py): `rubric_path_for`, `load_rubric`,
+  `load_presentation` and `available_dimensions`. Files are read as UTF-8 and handed on with
+  nothing stripped or reformatted, because the prompt's seams come from them. A missing rubric
+  says which dimensions do have one, which is how the absent TD rubric reports itself.
+- [prompts.py](propensity/annotation/prompts.py): `build_annotation_prompt` exactly as §7.3
+  writes it, plus `as_single_string` for a provider with one input field. A test asserts the
+  assembled prompt is the four pieces and nothing else, and that the closing `</rubric>` comes
+  only from the presentation block.
+- [parsing.py](propensity/annotation/parsing.py): `<FINAL_RANGE>` first, then the two legacy
+  phrasings, always taking the **last** match, and recording which pattern matched. Bounds off
+  the scale fail rather than being clamped, and nothing raises: a failure is a `ParsedRange`
+  with a reason, since the runner must never die mid-run.
+- [runner.py](propensity/annotation/runner.py): `build_requests`, `run_sequential` (thread pool
+  with bounded retry on provider errors, none on parse failures), `submit`, `wait_for_batch`,
+  `collect` and `rows_from_completions`, with `annotate()` composing them. Both paths share the
+  first and the last, so identical prompts and rows hold by construction. Rows come back one
+  per instance in input order, with the response text always kept, and a failed batch is
+  recorded on every row rather than raised.
+- [cli/annotate.py](propensity/cli/annotate.py): `run`, `submit [--wait]`, `status` and `fetch`,
+  wired as `propel-annotate`. `submit` writes `<out>.job.json` **before** polling starts;
+  `fetch` rebuilds the prompts and refuses if their hash drifted, unless forced. Credentials
+  are filtered out of the job file.
+- Tests: 73 new, 263 in total. **T7** checks that the sequential and batch paths give identical
+  prompts and identical rows, with the batch results scrambled; **T8** is the parser table. Also
+  covered: a dropped id becoming a provider-error row, an id that was never sent being reported
+  and dropped, retries stopping at the bound, and every CLI subcommand.
 
-## Phase 6 — `openai_compat` and the live check · Planned
+Two things this phase changed outside its own scope:
+
+- The mock gained an optional `state_path`. A real batch lives on the provider's side, which is
+  what lets submit, status and fetch be separate commands; without persistence the mock could
+  not stand in for that, and the resumable flow could not be tested end to end. This puts
+  `mock.py` at 148 lines, over the ≤120 the spec sets for adapters. The rule is there to catch a
+  leaking vendor abstraction, so the line-count test in Phase 7 will cover the vendor adapters
+  and exempt the mock, whose extra length is all test scripting.
+- [tests/test_end_to_end.py](tests/test_end_to_end.py) now runs the §14.1 check offline, with
+  simulation standing in for inciting: annotate 200 instances with a scripted mock annotator,
+  write the rows, load them back, draw outcomes for two subjects at known levels, and fit. Both
+  levels come back within 0.25, and the run warns about nothing.
+
+## Phase 6 — `openai_compat` and the live check · Next
 
 Lazy `import openai`. The constructor takes `model`, `api_key`, `api_key_env`, `base_url` and an
 injectable `client` for tests; `complete` never raises. The batch class uses Files + Batches, maps
