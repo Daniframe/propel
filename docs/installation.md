@@ -8,11 +8,12 @@
 
 ## Install
 
-From a copy of the repository:
-
 ```bash
-pip install ".[openai,plot]"         # or: pip install -e ".[openai,plot]" to edit the code
+pip install "propensity[openai,plot]"
 ```
+
+The distribution is `propensity`; so is the import (`import propensity`). From a clone of the
+repository, `pip install -e ".[openai,plot]"` installs it editable instead.
 
 Pick the extras you need; installing one provider's SDK is never required to use another's.
 
@@ -25,9 +26,10 @@ Pick the extras you need; installing one provider's SDK is never required to use
 | `http` | `httpx` | any other HTTP endpoint |
 | `plot` | `matplotlib`, `seaborn` | every figure, and `propel-fit --plots` |
 | `dotenv` | `python-dotenv` | reading credentials from a `.env` file |
+| `all` | all of the above | everything but the test suite |
 | `dev` | `pytest` | running the test suite |
 
-Several at once: `pip install ".[openai,anthropic,google,http,plot,dotenv]"`.
+Several at once: `pip install "propensity[openai,anthropic,plot]"`.
 
 Using a provider, or drawing a figure, without its extra raises an `ImportError` that names the
 extra to install. Importing `propensity` itself never needs any of them.
@@ -35,7 +37,7 @@ extra to install. Importing `propensity` itself never needs any of them.
 ## Check the installation
 
 ```bash
-propel-annotate --help
+propel-annotate --version
 propel-fit --help
 python -c "import propensity; print(propensity.available_providers())"
 ```
@@ -46,8 +48,13 @@ The last line prints `['anthropic', 'azure', 'google', 'http', 'mock', 'openai']
 
 The rubrics ship inside the package, so the commands work from any directory. They also read
 an optional settings file, `config/annotation.yaml` or `config/modelling.yaml`, relative to the
-working directory. Run from the project root to use the ones in the repository, or pass
-`--config` ([Configuration](configuration.md)).
+working directory, or the file named by `--config` ([Configuration](configuration.md)).
+
+The example data the tutorials use also ships with the package:
+
+```bash
+python -m propensity.examples            # copies it into ./examples; --force overwrites
+```
 
 ## Credentials
 

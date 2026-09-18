@@ -33,10 +33,10 @@ the results as a file.
 ## Install
 
 ```bash
-pip install ".[openai,plot]"        # pick the extras you need: openai, azure, anthropic, google, http, plot, dotenv
+pip install "propensity[openai,plot]"     # pick the extras you need: openai, azure, anthropic, google, http, plot, dotenv, all
 ```
 
-Python 3.10 or later. [Installation](docs/installation.md) lists every extra.
+Python 3.10 or later. [Installation](https://github.com/Daniframe/propel/blob/main/docs/installation.md) lists every extra.
 
 ## Quick start
 
@@ -74,30 +74,32 @@ profiles = fit_profiles(load_annotations("RA.jsonl"), load_outcomes("my_results.
 
 | | |
 |---|---|
-| [Documentation home](docs/README.md) | start here |
-| [Concepts](docs/concepts.md) | levels, demand intervals, `theta`, diagnostics |
-| [Tutorials](docs/tutorials/README.md) | eleven walkthroughs, from a five-minute offline run to writing rubrics and providers |
-| [Command line](docs/cli.md) · [Configuration](docs/configuration.md) · [Providers](docs/providers.md) | every flag, setting and option |
-| [Data formats](docs/data-formats.md) · [Rubrics and prompts](docs/rubrics.md) · [Plots](docs/plots.md) | the files, the prompts, the figures |
-| [Dimensions](docs/dimensions.md) · [Managing rubrics](docs/managing-rubrics.md) | every dimension shipped; updating rubrics and adding dimensions |
-| [API reference](docs/api/README.md) | every public function |
+| [Documentation home](https://github.com/Daniframe/propel/blob/main/docs/README.md) | start here |
+| [Concepts](https://github.com/Daniframe/propel/blob/main/docs/concepts.md) | levels, demand intervals, `theta`, diagnostics |
+| [Tutorials](https://github.com/Daniframe/propel/blob/main/docs/tutorials/README.md) | eleven walkthroughs, from a five-minute offline run to writing rubrics and providers |
+| [Command line](https://github.com/Daniframe/propel/blob/main/docs/cli.md) · [Configuration](https://github.com/Daniframe/propel/blob/main/docs/configuration.md) · [Providers](https://github.com/Daniframe/propel/blob/main/docs/providers.md) | every flag, setting and option |
+| [Data formats](https://github.com/Daniframe/propel/blob/main/docs/data-formats.md) · [Rubrics and prompts](https://github.com/Daniframe/propel/blob/main/docs/rubrics.md) · [Plots](https://github.com/Daniframe/propel/blob/main/docs/plots.md) | the files, the prompts, the figures |
+| [Dimensions](https://github.com/Daniframe/propel/blob/main/docs/dimensions.md) · [Managing rubrics](https://github.com/Daniframe/propel/blob/main/docs/managing-rubrics.md) | every dimension shipped; updating rubrics and adding dimensions |
+| [API reference](https://github.com/Daniframe/propel/blob/main/docs/api/README.md) | every public function |
 
 ## Dimensions
 
 Each dimension has its own rubric, and the rubrics ship inside the package, with a catalogue of
-trait names, poles and versions. [Dimensions](docs/dimensions.md) lists them all.
+trait names, poles and versions. [Dimensions](https://github.com/Daniframe/propel/blob/main/docs/dimensions.md) lists them all.
 
-- **Updating a rubric or adding a dimension:** [Managing rubrics](docs/managing-rubrics.md).
+- **Updating a rubric or adding a dimension:** [Managing rubrics](https://github.com/Daniframe/propel/blob/main/docs/managing-rubrics.md).
 - **Trying a rubric of your own** without changing the package:
-  [Tutorial 9](docs/tutorials/09-writing-a-rubric.md).
+  [Tutorial 9](https://github.com/Daniframe/propel/blob/main/docs/tutorials/09-writing-a-rubric.md).
 
 ## Before trusting a number
 
 Check that the chain recovers levels you set yourself: incite a model to known levels, fit it,
-and compare ([Tutorial 7](docs/tutorials/07-validating-with-incitement.md)). Do it for each
+and compare ([Tutorial 7](https://github.com/Daniframe/propel/blob/main/docs/tutorials/07-validating-with-incitement.md)). Do it for each
 dimension before interpreting any uninstructed model.
 
 ## Development
+
+From a clone of the repository:
 
 ```bash
 pip install -e ".[dev,plot,openai,anthropic,google,http]"
