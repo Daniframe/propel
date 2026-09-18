@@ -31,7 +31,7 @@ def requests(n=3):
     return [BatchRequest(custom_id=f"q{i}", system="S", user=f"U{i}") for i in range(n)]
 
 
-# --- the protocol (§4.2) -----------------------------------------------------------------
+# --- the protocol -----------------------------------------------------------------------
 
 def test_the_two_protocols_separate_batch_capable_providers():
     assert isinstance(MockProvider(), LLMProvider)
@@ -50,7 +50,7 @@ def test_completions_and_requests_are_frozen_with_the_documented_defaults():
         BatchRequest(custom_id="q0", system="S", user="U").user = "no"
 
 
-# --- the registry (§4.1 rule 7) ----------------------------------------------------------
+# --- the registry: a new provider needs no core change ---------------------------------
 
 def test_the_mock_registers_itself():
     assert "mock" in available_providers()
@@ -93,7 +93,7 @@ def test_two_providers_coexist_without_sharing_state():
     assert second.calls == [] and first.calls == [("S", "U")]
 
 
-# --- the mock (§4.4) ---------------------------------------------------------------------
+# --- the mock ---------------------------------------------------------------------------
 
 def test_the_default_response_carries_a_parsable_range():
     completion = MockProvider().complete("S", "U")

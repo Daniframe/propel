@@ -1,4 +1,4 @@
-"""The propel-annotate subcommands: run, submit, status and fetch (CLAUDE.md §8)."""
+"""The propel-annotate subcommands: run, submit, status and fetch."""
 
 import json
 import subprocess
@@ -139,6 +139,13 @@ def test_fetch_says_when_a_batch_is_not_ready(workspace, capsys):
     assert "is running; nothing to fetch yet" in capsys.readouterr().out
 
 
+def test_fetch_says_a_failed_batch_must_be_resubmitted(workspace, capsys):
+    options = [*batching(workspace), "--provider-option", "states=failed"]
+    assert main(argv(workspace, "submit", *options)) == 0
+    assert main(["fetch", "--job", str(workspace / "annotations.jsonl.job.json")]) == 1
+    assert "ended as failed; nothing to fetch. Submit it again." in capsys.readouterr().out
+
+
 def test_a_batch_that_loses_an_id_still_writes_a_row_for_it(workspace):
     assert main(argv(workspace, "submit", "--wait", out="dropped.jsonl",
                      *batching(workspace, "--provider-option", "drop=RA_1"))) == 0
@@ -175,6 +182,31 @@ def test_a_missing_rubric_is_refused(workspace, capsys):
     assert "no rubric for dimension 'TD'" in capsys.readouterr().err
 
 
+def test_the_packaged_rubrics_and_catalogue_need_no_configuration(workspace, monkeypatch):
+    import propensity.cli.annotate as cli
+    from propensity.annotation import load_rubric
+
+    annotator = MockBatchProvider()
+    monkeypatch.setattr(cli, "get_provider", lambda name, **options: annotator)
+    out = workspace / "packaged.jsonl"
+    assert main(["run", "--instances", str(workspace / "items.jsonl"), "--dimension", "RA",
+                 "--out", str(out), "--provider", "mock", "--model", "mock-1",
+                 "--config", str(workspace / "absent.yaml")]) == 0
+
+    _, user = annotator.calls[0]
+    assert user.startswith("The following is a rubric for determining the propensity of showing "
+                           "bias towards risk aversion:")  # the catalogue's name
+    assert load_rubric("RA") in user                        # the packaged rubric, current version
+    assert read_table(out)["parse_ok"].tolist() == [True] * 3
+
+
+def test_a_dimension_outside_the_catalogue_needs_a_name(workspace, capsys):
+    assert main(["run", "--instances", str(workspace / "items.jsonl"), "--dimension", "TD",
+                 "--out", str(workspace / "td.jsonl"), "--provider", "mock", "--model", "mock-1",
+                 "--config", str(workspace / "absent.yaml")]) == 2
+    assert "not in the dimension catalogue; pass --propensity-name" in capsys.readouterr().err
+
+
 def test_an_unknown_provider_is_refused(workspace, capsys):
     assert main(argv(workspace, "run", "--provider", "nope")) == 2
     assert "unknown provider 'nope'" in capsys.readouterr().err
@@ -183,6 +215,24 @@ def test_an_unknown_provider_is_refused(workspace, capsys):
 def test_a_malformed_provider_option_is_refused(workspace, capsys):
     assert main(argv(workspace, "run", "--provider-option", "justakey")) == 2
     assert "KEY=VALUE" in capsys.readouterr().err
+
+
+def test_an_option_the_provider_does_not_take_is_refused_without_a_traceback(workspace, capsys):
+    assert main(argv(workspace, "run", "--provider-option", "bse_url=http://x")) == 2
+    err = capsys.readouterr().err
+    assert "could not start the 'mock' provider" in err and "bse_url" in err
+    assert "Traceback" not in err
+
+
+def test_a_missing_sdk_is_reported_with_its_extra(workspace, capsys, monkeypatch):
+    import propensity.cli.annotate as cli
+
+    def missing(*args, **kwargs):
+        raise ImportError('the \'openai\' provider needs the openai package: pip install "propel[openai]"')
+
+    monkeypatch.setattr(cli, "get_provider", missing)
+    assert main(argv(workspace, "run")) == 2
+    assert 'pip install "propel[openai]"' in capsys.readouterr().err
 
 
 def test_batch_mode_needs_a_batch_capable_provider(workspace, capsys):

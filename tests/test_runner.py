@@ -1,4 +1,5 @@
-"""The annotation runner: CLAUDE.md §8, including T7 (path equivalence)."""
+"""The annotation runner, including path equivalence: the sequential and batch paths build
+identical prompts and write identical rows."""
 
 import pytest
 
@@ -120,7 +121,7 @@ def test_a_non_zero_temperature_is_flagged(caplog):
     assert "intervals will not be stable" in caplog.text
 
 
-# --- rows (§6.2) -------------------------------------------------------------------------
+# --- rows ---------------------------------------------------------------------------------
 
 def test_every_instance_gets_one_row_in_input_order_with_its_other_fields():
     rows = run(MockProvider(), "sequential")

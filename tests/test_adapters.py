@@ -1,4 +1,5 @@
-"""What every adapter owes the core: registration, the line budget, T7 and T9 (CLAUDE.md §4, §12)."""
+"""What every adapter owes the core: registration, the line budget, path equivalence, and
+imports that name the extra to install."""
 
 import ast
 import io
@@ -42,7 +43,7 @@ def test_every_adapter_satisfies_the_protocol_and_says_truthfully_whether_it_bat
     assert provider.name == name
 
 
-# --- the line budget (§4.4): code lines, not docstrings, comments or blanks --------------
+# --- the line budget: code lines, not docstrings, comments or blanks ---------------------
 
 def code_lines(source: str) -> int:
     tree = ast.parse(source)

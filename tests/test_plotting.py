@@ -1,4 +1,4 @@
-"""The optional renderers: CLAUDE.md §10. Figures are drawn off-screen and inspected, not eyeballed."""
+"""The optional renderers. Figures are drawn off-screen and inspected, not eyeballed."""
 
 import logging
 import subprocess
@@ -83,7 +83,7 @@ def test_drawing_without_matplotlib_names_the_extra_that_installs_it():
     assert 'pip install "propel[plot]"' in done.stdout
 
 
-# --- the curve (§10.1) -------------------------------------------------------------------
+# --- the curve --------------------------------------------------------------------------
 
 def test_the_curve_shows_the_bins_the_smooth_the_estimate_and_its_interval(new_axes):
     demands, success = simulate(0.5)
@@ -135,7 +135,7 @@ def test_plotting_without_axes_opens_a_new_figure():
     plt.close("all")
 
 
-# --- the surface (§10.2) -----------------------------------------------------------------
+# --- the surface ------------------------------------------------------------------------
 
 def three_state_surface():
     """(b_l, b_u) = (-1, 1) three times, two successes; (0, 0) twice, no success. Every other

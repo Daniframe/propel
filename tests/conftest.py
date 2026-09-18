@@ -8,7 +8,7 @@ os.environ.setdefault("MPLBACKEND", "Agg")  # figures render off-screen; no wind
 
 @pytest.fixture(autouse=True)
 def _no_network(monkeypatch):
-    """No test may make a network call (CLAUDE.md §12); fail loudly if one tries."""
+    """No test may make a network call; fail loudly if one tries."""
 
     def refuse(*args, **kwargs):
         raise RuntimeError("tests must not open network connections")

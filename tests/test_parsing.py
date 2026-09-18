@@ -1,4 +1,4 @@
-"""T8, the parser table: CLAUDE.md §7.4."""
+"""Reading the demand interval out of an annotator's response."""
 
 import pytest
 

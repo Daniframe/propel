@@ -1,8 +1,8 @@
 """The whole pipeline offline: annotate with the mock, then fit simulated outcomes.
 
-This is the check CLAUDE.md §14.1 describes, with the inciting replaced by simulation: outcomes
+This is the validation with incited models, with the inciting replaced by simulation: outcomes
 are drawn for a subject sitting at a known propensity level, and the fit has to find it again.
-It exercises annotation, the §6.2 row contract, the loaders, the join and the fit in one pass,
+It exercises annotation, the annotation rows, the loaders, the join and the fit in one pass,
 with no network and nothing spent.
 """
 

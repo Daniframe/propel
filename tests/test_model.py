@@ -10,7 +10,7 @@ T1_INTERVALS = [(-3, 3), (-2, 2), (0, 1), (-1, -1), (2, 2)]
 
 def _raw_exp_formula(x, b_l, b_u, k1, k2, min_width=0.1, rho=2.0):
     """The pre-fix return statement (raw exp, no expit), with the corrected outward widening,
-    so the comparison isolates the expit change (CLAUDE.md §9.1, bug 2)."""
+    so the comparison isolates the change to a numerically stable expit product."""
     w0 = b_u - b_l
     w = max(min_width, w0)
     b_l, b_u = b_l - (w - w0) / 2, b_u + (w - w0) / 2

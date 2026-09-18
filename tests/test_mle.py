@@ -151,7 +151,7 @@ def test_bad_inputs_are_rejected(demands, success, match):
         fit_theta(demands, success)
 
 
-# --- guarded restarts (§9.4) -------------------------------------------------------------
+# --- guarded restarts ---------------------------------------------------------------------
 
 def test_no_retries_when_the_first_attempt_converges():
     demands, success = simulate(0.5, seed=2)
@@ -237,7 +237,7 @@ def test_standard_error_densifies_a_bounded_optimiser_result():
     assert _standard_error(res.hess_inv) == pytest.approx(np.sqrt(0.5), rel=1e-2)
 
 
-# --- diagnostics (§9.6) ------------------------------------------------------------------
+# --- diagnostics --------------------------------------------------------------------------
 
 def test_diagnostics_on_a_healthy_bank_have_no_warnings():
     demands, success = simulate(0.5, seed=2)

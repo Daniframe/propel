@@ -22,7 +22,7 @@ def simulate(theta, n_items=400, seed=0):
     return demands, rng.binomial(1, p)
 
 
-# --- curve (§10.1) -----------------------------------------------------------------------
+# --- curve ------------------------------------------------------------------------------
 
 def test_curve_returns_bins_and_a_smooth_over_interval_centres():
     demands, success = simulate(0.5)
@@ -76,7 +76,7 @@ def test_a_single_populated_bin_has_nothing_to_smooth_and_warns_about_nothing():
     assert curve["lowess_y"][0] == pytest.approx(0.8)
 
 
-# --- surface (§10.2) ---------------------------------------------------------------------
+# --- surface ----------------------------------------------------------------------------
 
 def test_surface_covers_the_whole_grid_in_the_plotted_orientation():
     demands, success = simulate(0.5)
