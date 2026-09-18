@@ -10,7 +10,6 @@ are never run.
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -18,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from propensity import providers
+from propensity.examples import EXAMPLES_DIR, copy_examples
 
 ROOT = Path(__file__).resolve().parents[1]
 TUTORIALS = ROOT / "docs" / "tutorials"
@@ -90,7 +90,7 @@ def anchors(path):
 
 
 def documents():
-    return [ROOT / "README.md", ROOT / "examples" / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
+    return [ROOT / "README.md", EXAMPLES_DIR / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
 
 
 @pytest.mark.parametrize("document", documents(), ids=lambda path: str(path.relative_to(ROOT)))
@@ -121,9 +121,8 @@ def test_the_tutorial_runs_as_written(name, tmp_path, monkeypatch):
     if RUNNABLE[name]:
         pytest.importorskip("matplotlib")
         pytest.importorskip("seaborn")
-    for folder in ("config", "examples"):
-        shutil.copytree(ROOT / folder, tmp_path / folder)
     monkeypatch.chdir(tmp_path)
+    copy_examples("examples")  # as a reader does: python -m propensity.examples
     # A tutorial may register providers of its own; none of them may outlive it.
     monkeypatch.setattr(providers, "_REGISTRY", dict(providers._REGISTRY))
     env = {**os.environ, "PYTHONPATH": os.pathsep.join(

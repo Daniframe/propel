@@ -14,8 +14,8 @@ The workflow is three commands, so that nothing depends on one process staying a
 submit  →  job file  →  status (as often as you like)  →  fetch
 ```
 
-**You need:** PROPEL, run from the project root. Everything below rehearses with the `mock`
-provider; [step 6](#6-with-a-real-provider) shows the real commands.
+**You need:** PROPEL, run where `python -m propensity.examples` has put the example data in
+`examples/`. Everything below rehearses with the `mock` provider; [step 6](#6-with-a-real-provider) shows the real commands.
 
 ## 1. A rehearsal configuration
 

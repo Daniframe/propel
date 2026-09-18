@@ -4,8 +4,8 @@ Connect an LLM API that PROPEL does not ship. Try the [`http` provider](../provi
 first: any API that takes JSON and returns JSON needs only two small functions. Write a provider
 when the API needs its own SDK, authentication flow or batch endpoint.
 
-**You need:** PROPEL, run from the project root. The code runs offline: a small class stands in
-for the vendor's SDK.
+**You need:** PROPEL, run where `python -m propensity.examples` has put the example data in
+`examples/`. The code runs offline: a small class stands in for the vendor's SDK.
 
 ## 1. The contract
 

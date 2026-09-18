@@ -3,7 +3,7 @@
 Fit propensity levels, read the profile table, recognise an item bank that cannot measure, and
 tune the fit.
 
-**You need:** PROPEL, run from the project root.
+**You need:** PROPEL, run where `python -m propensity.examples` has put the example data in `examples/`.
 
 ## 1. Fit every subject
 

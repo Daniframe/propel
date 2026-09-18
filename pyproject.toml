@@ -58,8 +58,10 @@ version = { attr = "propensity.__version__" }
 include = ["propensity*"]
 
 [tool.setuptools.package-data]
-# The rubrics ship with the package: the catalogue, the shared presentation block, every version.
-propensity = ["rubrics/*.md", "rubrics/*.yaml", "rubrics/*/*.md"]
+# The rubrics ship with the package: the catalogue, the shared presentation block, every
+# version. So does the example data the tutorials use.
+propensity = ["rubrics/*.md", "rubrics/*.yaml", "rubrics/*/*.md", "examples/*.md",
+              "examples/*.jsonl", "examples/*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

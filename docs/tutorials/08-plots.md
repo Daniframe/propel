@@ -3,7 +3,7 @@
 Draw every figure PROPEL offers, as files or in a notebook, and combine them. How to read each
 figure: [Plots](../plots.md).
 
-**You need:** PROPEL with the `plot` extra, run from the project root.
+**You need:** PROPEL with the `plot` extra, run where `python -m propensity.examples` has put the example data in `examples/`.
 
 ## 1. Data to draw
 

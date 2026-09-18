@@ -57,5 +57,7 @@ PROPEL never runs the models being evaluated. You bring their results as a file.
 
 ## Examples
 
-[`examples/`](../examples/README.md) holds a small synthetic dataset (120 risk-aversion
-instances, their intervals, and outcomes for four simulated subjects) that the tutorials use.
+[The example data](../propensity/examples/README.md) is a small synthetic dataset (120
+risk-aversion instances, their intervals, and outcomes for four simulated subjects) that the
+tutorials use. It ships with the package: `python -m propensity.examples` copies it into
+`./examples`.

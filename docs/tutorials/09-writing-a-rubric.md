@@ -7,7 +7,8 @@ against it, so it deserves the most care of anything in the project.
 - **Required structure:** [Rubrics and prompts](../rubrics.md#rubric-structure).
 - **Moving a finished rubric into PROPEL:** [Managing rubrics](../managing-rubrics.md#adding-a-dimension).
 
-**You need:** PROPEL, run from the project root. This tutorial writes only to `out/rubrics/`.
+**You need:** PROPEL, run where `python -m propensity.examples` has put the example data in
+`examples/`. This tutorial writes only to `out/rubrics/`.
 
 ## 1. A rubrics directory of your own
 

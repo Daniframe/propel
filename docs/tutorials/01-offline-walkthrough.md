@@ -3,8 +3,9 @@
 Annotate a bank of instances, simulate three models at known propensity levels, fit them, and
 draw the result. No credentials, no network: a scripted `mock` provider stands in for the LLM.
 
-**You need:** PROPEL with the `plot` extra, run from the project root. Every block continues
-from the previous one; paste them into one Python session or script.
+**You need:** PROPEL with the `plot` extra, run where `python -m propensity.examples` has put
+the example data in `examples/`. Every block continues from the previous one; paste them into
+one Python session or script.
 
 ## 1. Load the instances
 

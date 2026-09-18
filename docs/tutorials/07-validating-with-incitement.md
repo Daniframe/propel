@@ -8,7 +8,7 @@ dimension, and again after changing a rubric or the annotating model.
 PROPEL does not run models, so producing the outcomes is up to you. This tutorial covers what
 to produce, then fits and judges the example data, which was simulated in exactly that shape.
 
-**You need:** PROPEL with the `plot` extra, run from the project root.
+**You need:** PROPEL with the `plot` extra, run where `python -m propensity.examples` has put the example data in `examples/`.
 
 ## 1. Write one system prompt per level
 

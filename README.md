@@ -40,9 +40,10 @@ Python 3.10 or later. [Installation](docs/installation.md) lists every extra.
 
 ## Quick start
 
-From the project root, with the bundled example data and no credentials:
+With the example data that ships with the package, and no credentials:
 
 ```bash
+python -m propensity.examples          # copies the example data into ./examples
 propel-fit --annotations examples/annotations_RA.jsonl --outcomes examples/outcomes_long.csv \
     --out out/profiles.csv --plots out/plots
 ```

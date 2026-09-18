@@ -3,7 +3,11 @@
 Both commands, end to end, on the bundled example data. No credentials: annotation uses the
 `mock` provider.
 
-**You need:** PROPEL with the `plot` extra, run from the project root.
+**You need:** PROPEL with the `plot` extra, and the example data:
+
+```bash
+python -m propensity.examples      # copies it into ./examples
+```
 
 ## The example data
 
@@ -17,7 +21,7 @@ Both commands, end to end, on the bundled example data. No credentials: annotati
 The four subjects were simulated at known levels: `demo-model` at `+0.7`, and three incited
 copies, `demo-model_RA_-2`, `demo-model_RA_0` and `demo-model_RA_+2`.
 
-`python examples/make_examples.py` rebuilds all four files, identically.
+`python -m propensity.examples.generate examples` rebuilds all four files, identically.
 
 ## 1. Annotate, one call at a time
 

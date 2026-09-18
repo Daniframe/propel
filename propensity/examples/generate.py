@@ -1,10 +1,10 @@
 """Build the synthetic example files used by the tutorials.
 
-Deterministic: running it again reproduces the files exactly.
+Deterministic: running it again reproduces the shipped files exactly.
 
-    python examples/make_examples.py
+    python -m propensity.examples.generate [DIR]      # DIR defaults to examples
 
-Files written next to this script:
+Files written:
 
     items_RA.jsonl          120 risk-aversion instances (lotteries), ready to annotate
     annotations_RA.jsonl    demand intervals for those instances, in the canonical format
@@ -23,13 +23,13 @@ and the outcomes are simulated from the response model at known propensity level
 import csv
 import json
 import random
+import sys
 from pathlib import Path
 
 import numpy as np
 
 from propensity import two_sided_sigma
 
-HERE = Path(__file__).resolve().parent
 N_ITEMS = 120
 SUBJECTS = {"demo-model": 0.7, "demo-model_RA_-2": -2.0, "demo-model_RA_0": 0.0,
             "demo-model_RA_+2": 2.0}
@@ -65,15 +65,17 @@ def interval(ratio):
     return lower, 3                       # the sure thing is better: risk seekers fail first
 
 
-def main():
+def main(out="examples"):
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
     rng = random.Random(7)
     items = make_items(rng)
-    with open(HERE / "items_RA.jsonl", "w", encoding="utf-8", newline="\n") as f:
+    with open(out / "items_RA.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for item in items:
             f.write(json.dumps({k: item[k] for k in ("question_id", "question_text", "source")}) + "\n")
 
     bounds = {}
-    with open(HERE / "annotations_RA.jsonl", "w", encoding="utf-8", newline="\n") as f:
+    with open(out / "annotations_RA.jsonl", "w", encoding="utf-8", newline="\n") as f:
         for item in items:
             lower, upper = interval(item["ev_ratio"])
             bounds[item["question_id"]] = (lower, upper)
@@ -96,21 +98,21 @@ def main():
             outcome = int(draws.random() < p)
             table[qid, subject] = "" if subject == "demo-model" and qid in NO_RESPONSE else outcome
 
-    with open(HERE / "outcomes_long.csv", "w", encoding="utf-8", newline="") as f:
+    with open(out / "outcomes_long.csv", "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f, lineterminator="\n")
         writer.writerow(["question_id", "subject_id", "outcome"])
         for subject in SUBJECTS:
             for item in items:
                 writer.writerow([item["question_id"], subject, table[item["question_id"], subject]])
 
-    with open(HERE / "outcomes_wide.csv", "w", encoding="utf-8", newline="") as f:
+    with open(out / "outcomes_wide.csv", "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f, lineterminator="\n")
         writer.writerow(["question_id", *(f"{subject}_outcome" for subject in SUBJECTS)])
         for item in items:
             writer.writerow([item["question_id"], *(table[item["question_id"], s] for s in SUBJECTS)])
     print(f"wrote {N_ITEMS} items, their annotations and outcomes for {len(SUBJECTS)} subjects "
-          f"to {HERE}")
+          f"to {out.as_posix()}")
 
 
 if __name__ == "__main__":
-    main()
+    main(*sys.argv[1:2])

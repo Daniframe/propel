@@ -19,8 +19,9 @@ in miniature; the rest go deep on one stage each.
 
 ## Conventions
 
-- **Where to run.** Run everything from the project root, where `config/` and `examples/`
-  live. Tutorials write only under `out/`.
+- **Where to run.** Run everything from one working directory. Put the example data there
+  first with `python -m propensity.examples`, which writes `examples/`. Tutorials write only
+  under `out/`.
 - **Code blocks follow on.** Within a tutorial, each Python block continues from the ones
   before: paste them into one session, script or notebook.
 - **Shells.** Commands are written for bash. In PowerShell, replace a trailing `\` with a

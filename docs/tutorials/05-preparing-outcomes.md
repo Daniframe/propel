@@ -4,7 +4,7 @@ PROPEL fits from your models' results: one 0/1 outcome per (instance, subject). 
 models and scoring their answers happen outside PROPEL. This tutorial covers shaping those
 results so they load, validate and join cleanly.
 
-**You need:** PROPEL, run from the project root.
+**You need:** PROPEL, run where `python -m propensity.examples` has put the example data in `examples/`.
 
 ## 1. From your evaluation log to long form
 
