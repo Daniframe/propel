@@ -1,26 +1,22 @@
 # Defaults for `propel-annotate`. Command-line flags override every value here.
-# Credentials never go in this file: each provider adapter reads its own environment
-# variables, and can be pointed at a different variable name per run.
+# Credentials never go in this file: each provider reads its own environment variables,
+# and can be pointed at a different variable name with `api_key_env`.
 
 provider: openai          # openai | azure | anthropic | google | http | mock
 model: gpt-4.1            # for azure, the deployment name
 provider_options: {}      # extra keyword arguments for the provider, e.g. base_url, or
                           # send_temperature: false for a model that rejects temperature
 
-temperature: 0.0          # keep at 0: intervals must be stable across reruns (CLAUDE.md §8)
-max_tokens: null          # provider default; adapters that require a value supply their own
-mode: auto                # auto | batch | sequential
-max_workers: 8
-max_retries: 3
-poll_interval_s: 60
+temperature: 0.0          # keep at 0: intervals must be stable across reruns
+max_tokens: null          # provider default; anthropic uses 16000 when unset
+max_workers: 8            # parallel calls for `run`
+max_retries: 3            # retries per instance after a provider error, for `run`
+poll_interval_s: 60       # seconds between polls for `submit --wait`
 
-rubrics_dir: rubrics
-
-# Code -> name inserted into the prompt ("...showing bias towards {name}"). These are part
-# of the prompt text, so they must match the names used for any annotations you compare against.
-dimensions:
-  RA: risk aversion
-  Ex: extraversion
-  Ul: ultracrepidarianism
-  BR: blue vs red colour preference
-  TD: delay of gratification
+# Rubrics, trait names and rubric versions come from the rubrics PROPEL ships and their
+# catalogue (propensity/rubrics/dimensions.yaml). Override them only deliberately:
+#
+# rubrics_dir: my_rubrics       # a rubrics directory of your own, laid out like the packaged one
+# rubric_version: v2            # read {CODE}/{CODE}_v2.md instead of the catalogue's version
+# dimensions:                   # trait names for codes the catalogue does not list
+#   TD: delay of gratification

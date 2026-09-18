@@ -4,12 +4,12 @@ propensity:
   min_width: 0.1       # floor on interval width before computing discrimination
   rho: 2.0             # how fast discrimination grows as width shrinks
   k_default: 1.0       # shared slope k1 = k2 when fitting
-  n_bins: 20           # bins for empirical curve / LOWESS init
+  n_bins: 20           # bins for the empirical curve and the LOWESS starting point
   lowess_frac: 0.4     # LOWESS bandwidth
-  maxiter: 500         # BFGS iterations
-  robust: true         # guarded restarts on non-convergence
+  maxiter: 500         # optimiser iterations per attempt
+  robust: true         # guarded restarts when the first attempt does not converge
   restart_range: [-5.0, 5.0]
-  likelihood: sum      # "product" only to reproduce published numbers bit for bit (CLAUDE.md §9.2)
+  likelihood: sum      # "product" only to reproduce published numbers bit for bit
 
 profiles:
   min_items: 30        # cells with fewer joined instances are recorded but not fitted
