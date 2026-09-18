@@ -20,6 +20,7 @@ from ..errors import PropensityError
 from ..modelling.io import load_annotations, load_outcomes, write_table
 from ..modelling.plotting import require_matplotlib, save_annotation_plots, save_profile_plots
 from ..modelling.profiles import fit_profiles
+from .. import __version__
 from . import load_config
 
 DEFAULT_CONFIG = "config/modelling.yaml"
@@ -31,6 +32,7 @@ FIT_SETTINGS = {"k_default": "k", "n_bins": "n_bins", "lowess_frac": "lowess_fra
 
 def build_parser():
     parser = argparse.ArgumentParser(prog="propel-fit", description=__doc__.splitlines()[0])
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("--annotations", nargs="+", required=True, metavar="[CODE=]PATH",
                         help="annotation files; prefix with CODE= for files without a dimension column")
     parser.add_argument("--outcomes", required=True, help="outcomes file, long or wide form")

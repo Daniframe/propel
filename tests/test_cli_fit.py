@@ -125,6 +125,15 @@ def test_low_join_yield_is_surfaced(tmp_path, capsys):
     assert "join yield RA: 40/80" in captured.out
 
 
+def test_version_is_the_package_version(capsys):
+    import propensity
+
+    with pytest.raises(SystemExit) as done:
+        main(["--version"])
+    assert done.value.code == 0
+    assert capsys.readouterr().out.strip() == f"propel-fit {propensity.__version__}"
+
+
 def test_the_module_entry_point_is_runnable():
     done = subprocess.run([sys.executable, "-m", "propensity.cli.fit", "--help"],
                           capture_output=True, text=True, check=False)

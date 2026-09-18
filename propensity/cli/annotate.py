@@ -35,6 +35,7 @@ from ..annotation.rubrics import DEFAULT_VERSION
 from ..errors import ContractError, PropensityError, ProviderError
 from ..modelling.io import load_instances, write_table
 from ..providers import get_provider
+from .. import __version__
 from . import load_config, load_dotenv_if_available
 
 DEFAULT_CONFIG = "config/annotation.yaml"
@@ -45,6 +46,7 @@ JOB_CONFIG_HELP = "accepted for symmetry; the job file holds every setting"
 
 def build_parser():
     parser = argparse.ArgumentParser(prog="propel-annotate", description=__doc__.splitlines()[0])
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     def with_inputs(command):

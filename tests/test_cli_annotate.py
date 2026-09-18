@@ -250,6 +250,15 @@ def test_flags_override_the_config_file(workspace):
     assert read_table(workspace / "annotations.jsonl")["annotator"].tolist() == ["mock:mock-9"] * 3
 
 
+def test_version_is_the_package_version(capsys):
+    import propensity
+
+    with pytest.raises(SystemExit) as done:
+        main(["--version"])
+    assert done.value.code == 0
+    assert capsys.readouterr().out.strip() == f"propel-annotate {propensity.__version__}"
+
+
 def test_the_module_entry_point_is_runnable():
     done = subprocess.run([sys.executable, "-m", "propensity.cli.annotate", "--help"],
                           capture_output=True, text=True, check=False)
