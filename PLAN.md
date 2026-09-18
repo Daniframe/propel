@@ -601,6 +601,39 @@ At the user's request, with about 25 dimensions planned for the release:
 
 **Tests:** 494, green with warnings as errors. With minimal dependencies, 445 pass and 49 skip.
 
+## Packaging (0.1.0)
+
+- **Distribution** `propensity` 0.1.0: MIT, author Daniframe. `__version__` lives in
+  `propensity/__init__.py` and setuptools (>=77) reads it. `--version` works on both CLIs.
+  LICENSE, CHANGELOG.md and MANIFEST.in were added.
+- **The wheel** holds the package, its rubrics and the example data. **The sdist** adds `docs/`,
+  `tests/` and `config/`, and nothing from `neurips/`, `reproducibility/`, `live_check/`,
+  `CLAUDE.md` or `PLAN.md`.
+- **Example data** moved into `propensity/examples/`:
+  - `python -m propensity.examples [DIR]` copies it;
+  - `python -m propensity.examples.generate DIR` rebuilds it byte for byte;
+  - the tutorials and their test harness now start from the copy, as a user does.
+- **README links** are absolute GitHub URLs, because the README is also the PyPI page. The link
+  checker resolves them locally, and falls back to the installed package when the source tree
+  is absent.
+- **Dependency floors** are the oldest versions the whole suite passes with:
+  - `openai>=1.55.3`: older releases cannot build a client on httpx 0.28;
+  - `anthropic>=0.41`: 0.40 has no `messages.batches`;
+  - `google-genai>=1.46`;
+  - `matplotlib>=3.8` with `seaborn>=0.13`: older pairs fail 6 plot tests.
+
+  A new test builds every adapter's real SDK client from a bare key, and the anthropic
+  real-SDK test now runs on both the 0.x (httpx) and 1.x (httpx2) SDKs.
+- **Fixed a flaky T7.** It compared the order of calls recorded under 8 threads, which varied in
+  about 8% of runs on Linux. It now uses one worker, plus a separate multi-worker check.
+- **Tested from the built files.** The wheel was installed into fresh environments, then the
+  sdist's tests ran against it, followed by a CLI smoke run from an empty directory.
+  - Windows, Python 3.12: all extras, and core only.
+  - Linux (Docker), Python 3.10 and 3.13: all extras, and core only.
+  - Linux, Python 3.10, at the dependency floors (two sets).
+
+**Tests:** 507, green with warnings as errors. With minimal dependencies, 453 pass and 54 skip.
+
 ## Verification
 
 - **Tests:** `C:\Users\Daniel\.venvs\propel\Scripts\python.exe -m pytest -q -W error` after every
