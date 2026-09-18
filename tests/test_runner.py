@@ -47,13 +47,26 @@ def test_t7_sequential_and_batch_produce_identical_prompts_and_rows():
     sequential_provider = MockProvider(response=answers)
     batch_provider = MockBatchProvider(response=answers, scramble=True, seed=3)
 
-    sequential_rows = run(sequential_provider, "sequential")
+    # One worker, so the sequential calls are made, and recorded, in input order.
+    sequential_rows = run(sequential_provider, "sequential", max_workers=1)
     batch_rows = run(batch_provider, "batch")
 
     assert sequential_rows == batch_rows
     assert sequential_provider.calls == batch_provider.calls  # byte-identical prompts, same order
     assert [row["question_id"] for row in batch_rows] == ["RA_0", "RA_1", "RA_2", "RA_3"]
     assert all(row["parse_ok"] for row in batch_rows)
+
+
+def test_t7_holds_with_parallel_workers_whatever_order_the_calls_finish_in():
+    answers = script(n=16)
+    sequential_provider = MockProvider(response=answers)
+    batch_provider = MockBatchProvider(response=answers, scramble=True, seed=3)
+
+    sequential_rows = run(sequential_provider, "sequential", n=16, max_workers=8)
+    batch_rows = run(batch_provider, "batch", n=16)
+
+    assert sequential_rows == batch_rows  # rows always come back in input order
+    assert sorted(sequential_provider.calls) == sorted(batch_provider.calls)
 
 
 def test_a_scrambled_batch_is_rejoined_by_id_never_by_position():
