@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+import propensity
 from propensity.annotation.prompts import (
     ANNOTATION_SYSTEM,
     as_single_string,
@@ -56,7 +57,7 @@ def test_the_name_of_the_trait_is_the_only_moving_part_of_the_preamble():
 # --- against the rubrics that ship with the package --------------------------------------
 
 def test_the_packaged_rubrics_are_the_default():
-    assert RUBRICS_DIR == Path(__file__).resolve().parents[1] / "propensity" / "rubrics"
+    assert RUBRICS_DIR == Path(propensity.__file__).resolve().parent / "rubrics"
     assert load_rubric("RA") == load_rubric("RA", RUBRICS_DIR, "v1")
     assert load_presentation() == (RUBRICS_DIR / "presentation.md").read_text(encoding="utf-8")
 

@@ -16,11 +16,13 @@ from pathlib import Path
 
 import pytest
 
+import propensity
 from propensity import providers
 from propensity.examples import EXAMPLES_DIR, copy_examples
 
 ROOT = Path(__file__).resolve().parents[1]
 TUTORIALS = ROOT / "docs" / "tutorials"
+PACKAGE = Path(propensity.__file__).resolve().parent
 FENCE = re.compile(r"(<!-- no-run -->[ \t]*\n)?```(\w*)[^\n]*\n(.*?)```", re.S)
 COMMANDS = {"propel-annotate": "propensity.cli.annotate", "propel-fit": "propensity.cli.fit"}
 # The README is also the package's PyPI page, so it links to the repository by absolute URL.
@@ -95,7 +97,19 @@ def documents():
     return [ROOT / "README.md", EXAMPLES_DIR / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
 
 
-@pytest.mark.parametrize("document", documents(), ids=lambda path: str(path.relative_to(ROOT)))
+def locate(path):
+    """A file a document links to. Links into propensity/ fall back to the installed package, for
+    running the tests against an installed copy instead of the source tree."""
+    if not path.exists() and path.is_relative_to(ROOT / "propensity"):
+        return PACKAGE / path.relative_to(ROOT / "propensity")
+    return path
+
+
+def name(path):
+    return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else f"<installed>/{path.name}"
+
+
+@pytest.mark.parametrize("document", documents(), ids=name)
 def test_every_link_and_anchor_resolves(document):
     text = re.sub(r"```.*?```", "", document.read_text(encoding="utf-8"), flags=re.S)
     broken = []
@@ -106,7 +120,7 @@ def test_every_link_and_anchor_resolves(document):
             continue  # an external URL
         path, _, anchor = target.removeprefix(REPOSITORY).partition("#")
         base = ROOT if in_repository else document.parent
-        resolved = (base / path).resolve() if path else document
+        resolved = locate((base / path).resolve()) if path else document
         if not resolved.exists():
             broken.append(target)
         elif anchor and resolved.suffix == ".md" and anchor not in anchors(resolved):
