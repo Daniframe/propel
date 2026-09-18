@@ -177,7 +177,8 @@ def test_the_key_comes_from_the_environment_and_an_explicit_one_wins(monkeypatch
 
 def test_the_real_sdk_sends_what_the_api_expects_and_reads_back_a_batch():
     anthropic = pytest.importorskip("anthropic")
-    httpx2 = pytest.importorskip("httpx2")  # the 1.x SDK's HTTP layer
+    # The HTTP library the SDK is built on: httpx2 from 1.0, httpx before.
+    http = pytest.importorskip("httpx2" if int(anthropic.__version__.split(".")[0]) >= 1 else "httpx")
     message = {"id": "msg_1", "type": "message", "role": "assistant", "model": MODEL,
                "content": [{"type": "text", "text": "<FINAL_RANGE>[0, 1]</FINAL_RANGE>"}],
                "stop_reason": "end_turn", "stop_sequence": None,
@@ -198,13 +199,13 @@ def test_the_real_sdk_sends_what_the_api_expects_and_reads_back_a_batch():
         assert request.headers["x-api-key"] == "sk-test"
         if request.method == "POST":
             bodies[path] = json.loads(request.content)
-            return httpx2.Response(200, json=message if path == "/v1/messages" else batch)
+            return http.Response(200, json=message if path == "/v1/messages" else batch)
         if path.endswith("/results"):
-            return httpx2.Response(200, content="\n".join(map(json.dumps, results)).encode())
-        return httpx2.Response(200, json=batch)
+            return http.Response(200, content="\n".join(map(json.dumps, results)).encode())
+        return http.Response(200, json=batch)
 
     client = anthropic.Anthropic(api_key="sk-test", max_retries=0,
-                                 http_client=httpx2.Client(transport=httpx2.MockTransport(handler)))
+                                 http_client=http.Client(transport=http.MockTransport(handler)))
     provider = get_provider("anthropic", model=MODEL, client=client)
 
     assert provider.complete("S", "U", temperature=0.0).text == "<FINAL_RANGE>[0, 1]</FINAL_RANGE>"

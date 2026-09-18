@@ -43,6 +43,21 @@ def test_every_adapter_satisfies_the_protocol_and_says_truthfully_whether_it_bat
     assert provider.name == name
 
 
+@pytest.mark.parametrize("name,sdk,kwargs", [
+    ("openai", "openai", {}),
+    ("azure", "openai", {"endpoint": "https://x.openai.azure.com"}),
+    ("anthropic", "anthropic", {}),
+    ("google", "google.genai", {}),
+    ("http", "httpx", {"url": "http://x", "build_payload": dict, "extract_text": str}),
+])
+def test_every_adapter_builds_its_real_sdk_client_from_a_key_alone(name, sdk, kwargs):
+    """No injected client: the SDK builds its own, as it does for a user. This is where an SDK
+    that does not fit the installed HTTP library fails."""
+    pytest.importorskip(sdk)
+    provider = get_provider(name, model="m", api_key="k", **kwargs)
+    assert provider.client is not None
+
+
 # --- the line budget: code lines, not docstrings, comments or blanks ---------------------
 
 def code_lines(source: str) -> int:

@@ -34,12 +34,13 @@ dependencies = [
 
 [project.optional-dependencies]
 # One extra per provider SDK: installing one is never required to use another.
-openai = ["openai>=1.40"]
-azure = ["openai>=1.40"]
-anthropic = ["anthropic"]
-google = ["google-genai"]
-http = ["httpx"]
-plot = ["matplotlib>=3.5", "seaborn>=0.12"]
+# The lower bounds are the oldest versions the test suite passes with.
+openai = ["openai>=1.55.3"]
+azure = ["openai>=1.55.3"]
+anthropic = ["anthropic>=0.41"]
+google = ["google-genai>=1.46"]
+http = ["httpx>=0.24"]
+plot = ["matplotlib>=3.8", "seaborn>=0.13"]
 dotenv = ["python-dotenv"]
 all = ["propensity[openai,anthropic,google,http,plot,dotenv]"]
 dev = ["pytest"]
