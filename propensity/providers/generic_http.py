@@ -41,7 +41,7 @@ class GenericHTTPProvider:
             import httpx
         except ImportError:
             raise ImportError("the 'http' provider needs the httpx package: "
-                              'pip install "propel[http]"') from None
+                              'pip install "propensity[http]"') from None
         return httpx.Client(timeout=timeout)
 
     def complete(self, system: str, user: str, *, temperature: float = 0.0,

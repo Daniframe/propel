@@ -40,7 +40,7 @@ def require_matplotlib():
         import matplotlib
         import seaborn
     except ImportError:
-        raise ImportError('plotting needs matplotlib and seaborn: pip install "propel[plot]"') from None
+        raise ImportError('plotting needs matplotlib and seaborn: pip install "propensity[plot]"') from None
     return matplotlib, seaborn
 
 

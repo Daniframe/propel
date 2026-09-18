@@ -49,7 +49,7 @@ class OpenAICompatProvider:
             import openai
         except ImportError:
             raise ImportError(f"the {self.name!r} provider needs the openai package: "
-                              f'pip install "propel[{self.name}]"') from None
+                              f'pip install "propensity[{self.name}]"') from None
         return openai
 
     def _client(self, api_key, api_key_env, base_url, client_options):

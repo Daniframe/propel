@@ -151,12 +151,12 @@ def test_plots_without_matplotlib_fail_before_anything_is_fitted(tmp_path, capsy
     import propensity.cli.fit as fit_cli
 
     def missing():
-        raise ImportError('plotting needs matplotlib and seaborn: pip install "propel[plot]"')
+        raise ImportError('plotting needs matplotlib and seaborn: pip install "propensity[plot]"')
 
     monkeypatch.setattr(fit_cli, "require_matplotlib", missing)
     write_inputs(tmp_path, legacy=False)
     code, out = run(tmp_path, "--plots", str(tmp_path / "plots"))
 
     assert code == 2
-    assert 'pip install "propel[plot]"' in capsys.readouterr().err
+    assert 'pip install "propensity[plot]"' in capsys.readouterr().err
     assert not out.exists() and not (tmp_path / "plots").exists()

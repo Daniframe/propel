@@ -38,7 +38,7 @@ class GoogleProvider:
             from google import genai
         except ImportError:
             raise ImportError("the 'google' provider needs the google-genai package: "
-                              'pip install "propel[google]"') from None
+                              'pip install "propensity[google]"') from None
         return genai.Client(api_key=api_key or os.environ.get(api_key_env), **client_options)
 
     def complete(self, system: str, user: str, *, temperature: float = 0.0,

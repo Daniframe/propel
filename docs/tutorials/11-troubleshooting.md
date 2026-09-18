@@ -17,8 +17,8 @@ exceptions.
 
 | Message | Cause | Fix |
 |---|---|---|
-| `the 'openai' provider needs the openai package: pip install "propel[openai]"` (or `anthropic`, `google`, `azure`, `http`) | the provider's SDK is not installed | run the `pip install` it names |
-| `plotting needs matplotlib and seaborn: pip install "propel[plot]"` | a figure was requested without the `plot` extra | `pip install "propel[plot]"` |
+| `the 'openai' provider needs the openai package: pip install "propensity[openai]"` (or `anthropic`, `google`, `azure`, `http`) | the provider's SDK is not installed | run the `pip install` it names |
+| `plotting needs matplotlib and seaborn: pip install "propensity[plot]"` | a figure was requested without the `plot` extra | `pip install "propensity[plot]"` |
 | `propel-annotate: command not found` | the environment where PROPEL is installed is not active | activate it, or run `python -m propensity.cli.annotate` |
 
 ## Starting an annotation run

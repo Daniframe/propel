@@ -171,4 +171,4 @@ def test_t9_each_adapter_names_the_extra_that_installs_its_sdk():
     messages = dict(line.split(" | ", 1) for line in done.stdout.strip().splitlines())
     assert sorted(messages) == ["anthropic", "azure", "google", "http", "openai"]
     for name, message in messages.items():
-        assert f'pip install "propel[{name}]"' in message, message
+        assert f'pip install "propensity[{name}]"' in message, message

@@ -46,7 +46,7 @@ class AnthropicProvider:
             import anthropic
         except ImportError:
             raise ImportError("the 'anthropic' provider needs the anthropic package: "
-                              'pip install "propel[anthropic]"') from None
+                              'pip install "propensity[anthropic]"') from None
         return anthropic.Anthropic(api_key=api_key or os.environ.get(api_key_env), **client_options)
 
     def complete(self, system: str, user: str, *, temperature: float = 0.0,

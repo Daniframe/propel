@@ -80,7 +80,7 @@ def test_drawing_without_matplotlib_names_the_extra_that_installs_it():
     )
     done = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
     assert done.returncode == 0, done.stderr
-    assert 'pip install "propel[plot]"' in done.stdout
+    assert 'pip install "propensity[plot]"' in done.stdout
 
 
 # --- the curve --------------------------------------------------------------------------

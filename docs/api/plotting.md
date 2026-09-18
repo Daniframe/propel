@@ -3,7 +3,7 @@
 Figures for curves, surfaces and item banks. How to read each: [Plots](../plots.md).
 
 - **Imports.** matplotlib and seaborn are imported on first draw. Without them, every function
-  raises `ImportError: plotting needs matplotlib and seaborn: pip install "propel[plot]"`.
+  raises `ImportError: plotting needs matplotlib and seaborn: pip install "propensity[plot]"`.
 - **Return values.** Every `plot_*` function draws on `ax` when given, or on a new pyplot
   figure, and returns the `Axes`. `plot_interval_trees` returns the `Figure`.
 - **Display.** Nothing calls `plt.show()`.

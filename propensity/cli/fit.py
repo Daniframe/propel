@@ -44,7 +44,7 @@ def build_parser():
     parser.add_argument("--no-robust", action="store_true", help="a single fit attempt, no guarded restarts")
     parser.add_argument("--plots", metavar="DIR",
                         help="also draw every cell's propensity curve and surface, and every "
-                             'dimension\'s interval distribution and tree, into DIR (needs "propel[plot]")')
+                             'dimension\'s interval distribution and tree, into DIR (needs "propensity[plot]")')
     parser.add_argument("--config", default=DEFAULT_CONFIG, help=f"settings file (default: {DEFAULT_CONFIG})")
     return parser
 

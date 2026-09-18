@@ -228,11 +228,11 @@ def test_a_missing_sdk_is_reported_with_its_extra(workspace, capsys, monkeypatch
     import propensity.cli.annotate as cli
 
     def missing(*args, **kwargs):
-        raise ImportError('the \'openai\' provider needs the openai package: pip install "propel[openai]"')
+        raise ImportError('the \'openai\' provider needs the openai package: pip install "propensity[openai]"')
 
     monkeypatch.setattr(cli, "get_provider", missing)
     assert main(argv(workspace, "run")) == 2
-    assert 'pip install "propel[openai]"' in capsys.readouterr().err
+    assert 'pip install "propensity[openai]"' in capsys.readouterr().err
 
 
 def test_batch_mode_needs_a_batch_capable_provider(workspace, capsys):

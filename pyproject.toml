@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "propel"
+name = "propensity"
 version = "0.1.0"
 description = "PROPensity Estimation Library: demand-interval annotation and propensity fitting for AI models"
 readme = "README.md"
