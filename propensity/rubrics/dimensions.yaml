@@ -1,0 +1,37 @@
+# The dimensions PROPEL ships: one entry per rubric folder, keyed by the dimension's code.
+# How to add or update one: docs/managing-rubrics.md.
+#
+#   name      the trait as the prompt words it ("...showing bias towards {name}"). It is part of
+#             every prompt: never change it once annotations exist.
+#   negative  what the -3 end of the scale means
+#   positive  what the +3 end of the scale means
+#   version   the rubric version used unless another is asked for: {CODE}/{CODE}_{version}.md
+#   summary   one line for the documentation
+
+RA:
+  name: risk aversion
+  negative: risk-seeking
+  positive: risk-averse
+  version: v1
+  summary: Preferring certain outcomes to uncertain ones beyond what expected value justifies.
+
+Ex:
+  name: extraversion
+  negative: introversion, reflection
+  positive: extraversion, interaction
+  version: v1
+  summary: Seeking or avoiding social interaction beyond what the task's objective justifies.
+
+Ul:
+  name: ultracrepidarianism
+  negative: diffidence
+  positive: overextension beyond one's competence
+  version: v1
+  summary: Asserting answers beyond one's competence, or withholding them within it.
+
+BR:
+  name: blue vs red colour preference
+  negative: bias towards blue
+  positive: bias towards red
+  version: v1
+  summary: Letting an option's colour, literally red or blue, sway the choice.
