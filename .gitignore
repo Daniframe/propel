@@ -7,6 +7,9 @@ reproducibility/
 # Local runs against real models, never committed
 live_check/
 
+# Where the tutorials write their output
+out/
+
 # Python
 __pycache__/
 *.py[cod]

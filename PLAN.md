@@ -535,6 +535,72 @@ as errors. With minimal dependencies, 375 pass and 45 skip.
 **Checked by hand:** trees, distributions and the tree grid for the paper's four GPT-4.1
 annotation files, and model surfaces at steps 0.05 and 1, all inspected as images.
 
+## Release documentation · Done
+
+`docs/` holds the user documentation, written as release documentation, with no mention of the
+build. It has:
+- a home page, installation, concepts, data formats, configuration, the CLI, providers, rubrics
+  and prompts, and plots;
+- an API reference per package;
+- eleven tutorials.
+
+`examples/` holds a deterministic synthetic dataset for the tutorials: 120 RA items, their
+intervals, and outcomes for four simulated subjects. `docs/images/` holds figures rendered from
+it, with the script that draws them.
+
+**Kept honest by tests.** [tests/test_docs.py](tests/test_docs.py):
+- runs every tutorial that needs no credentials exactly as written: Python blocks in order, and
+  `propel-*` commands through `python -m`;
+- checks every relative link and `#anchor` against GitHub's heading slugs.
+
+Writing the tutorials against the code found several things, all fixed:
+- `config/annotation.yaml` had a `mode:` key nothing read; it was removed, and
+  `rubric_version:` listed.
+- `--help` texts cited spec sections (which also rendered as `�` on Windows), and several flags
+  had no help.
+- `propel-annotate` crashed with a traceback on an unknown provider option, a missing SDK, or
+  credentials the SDK rejects. These are now one-line `error:` messages with exit code 2.
+- `fetch` on a failed batch said "nothing to fetch yet"; it now says to submit again.
+- The runtime warning for `send_temperature=False` cited `CLAUDE.md`.
+- `out/` is gitignored, since the tutorials write there.
+
+**Tests:** 462 in total, green with warnings as errors. With minimal dependencies, 413 pass and
+49 skip.
+
+### Rubrics in the package, and a self-contained codebase
+
+At the user's request, with about 25 dimensions planned for the release:
+- **The rubrics moved into the package**, from `rubrics/` to `propensity/rubrics/`, and are
+  declared as package data. A built wheel contains the catalogue, `presentation.md` and every
+  version; the move changed no byte.
+- **A catalogue**, `propensity/rubrics/dimensions.yaml`, gives each dimension its trait name
+  (prompt text), its poles, its current version and a summary. It is read by
+  `load_dimensions()` and `get_dimension()`, and exported as `Dimension`.
+  - The CLI takes the trait name and the default version from it, so `config/annotation.yaml`
+    no longer lists dimensions: they are optional overrides.
+  - Job files record the version actually used, with `rubrics_dir: null` meaning the packaged
+    rubrics.
+- **`check_rubric(text)`** reports departures from the required structure: title, sections, the
+  range sentence, seven ordered levels, saturating ends, and orthogonal and degenerate
+  examples.
+  - The tests apply it to every packaged rubric; only the v1 gaps already known are exempt
+    (`KNOWN_GAPS`), and nothing may be added there.
+  - `available_versions()` sorts `v2` before `v10`.
+  - A missing version names the versions that exist.
+- **The rubric tests** also check that folders and catalogue entries match, that trait names are
+  unique, and that `docs/dimensions.md` is up to date.
+- **Docs.**
+  - `docs/managing-rubrics.md`: the catalogue, three rules, step-by-step workflows for updating a
+    rubric and adding a dimension (with a template), retirement, what the tests guard, and
+    conventions for a growing catalogue.
+  - `docs/dimensions.md`: generated from the catalogue by `docs/make_dimensions.py`, including
+    each rubric's structure check.
+  - Tutorial 9 and every page that assumed a top-level `rubrics/` directory, updated.
+- **Every `CLAUDE.md` and `§` citation** was removed from the package's docstrings and comments
+  (55 passages) and from the tests (25). The code and the docs are self-contained.
+
+**Tests:** 494, green with warnings as errors. With minimal dependencies, 445 pass and 49 skip.
+
 ## Verification
 
 - **Tests:** `C:\Users\Daniel\.venvs\propel\Scripts\python.exe -m pytest -q -W error` after every

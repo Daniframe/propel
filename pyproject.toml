@@ -34,5 +34,9 @@ dev = ["pytest"]
 [tool.setuptools.packages.find]
 include = ["propensity*"]
 
+[tool.setuptools.package-data]
+# The rubrics ship with the package: the catalogue, the shared presentation block, every version.
+propensity = ["rubrics/*.md", "rubrics/*.yaml", "rubrics/*/*.md"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
