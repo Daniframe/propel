@@ -1,6 +1,6 @@
-"""Loading, normalising and joining the pipeline's files: CLAUDE.md §6.
+"""Loading, normalising and joining the pipeline's files.
 
-Every loader returns the tidy internal form (§6.4), whatever shape the file came in:
+Every loader returns the same tidy form, whatever shape the file came in:
 
     instances:    list of dicts with a string question_id and question_text
     annotations:  question_id · dimension · lower · upper · parse_ok
@@ -69,7 +69,7 @@ def write_table(data, path) -> Path:
 
 
 def load_instances(path) -> list[dict]:
-    """§6.1: reads instances to annotate. Only question_id and question_text are read; every
+    """Reads instances to annotate. Only question_id and question_text are read; every
     other field passes through untouched.
 
     A file with no question_id column gets ids "{stem}_{row_index}", numbered over the whole
@@ -119,7 +119,7 @@ def load_instances(path) -> list[dict]:
 # --- annotations -------------------------------------------------------------------------
 
 def load_annotations(source, *, dimension=None) -> pd.DataFrame:
-    """§6.2: reads annotations in the canonical form or any legacy shape, and returns the tidy
+    """Reads annotations in the canonical form or any legacy shape, and returns the tidy
     question_id · dimension · lower · upper · parse_ok frame.
 
     Legacy shapes, normalised silently: propensity_lower/propensity_upper and
@@ -216,7 +216,7 @@ def _reject_duplicates(frame, key, name):
 # --- outcomes ----------------------------------------------------------------------------
 
 def load_outcomes(source) -> pd.DataFrame:
-    """§6.3: reads the user's outcomes and returns the tidy question_id · subject_id · outcome
+    """Reads the user's outcomes and returns the tidy question_id · subject_id · outcome
     frame.
 
     Long form has question_id, subject_id and outcome columns. Wide form has question_id and
@@ -272,7 +272,7 @@ def load_outcomes(source) -> pd.DataFrame:
 # --- join --------------------------------------------------------------------------------
 
 def join_annotations_outcomes(annotations, outcomes, *, min_items=MIN_ITEMS_WARN, min_yield=YIELD_WARN):
-    """§6.4: inner join on question_id, after dropping annotations that failed to parse or
+    """Inner join on question_id, after dropping annotations that failed to parse or
     have a null bound.
 
     Returns (joined, report). The report gives, per dimension, the join yield: the share of

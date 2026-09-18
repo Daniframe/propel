@@ -1,4 +1,4 @@
-"""Azure OpenAI: CLAUDE.md §4.4, a thin subclass of the OpenAI adapter.
+"""Azure OpenAI: a thin subclass of the OpenAI adapter.
 
 `model` is the **deployment name**, not the public model name. Azure now serves the OpenAI v1
 API at `{endpoint}/openai/v1/`, which the plain OpenAI client speaks; pass `api_version` only for

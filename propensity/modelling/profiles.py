@@ -1,4 +1,4 @@
-"""Propensity profiles: CLAUDE.md §11, with the row shape of §6.5.
+"""Propensity profiles.
 
 A profile is the vector of theta across dimensions for one subject. The table produced here
 *is* the profile set; one subject's profile is a filter on it.
@@ -14,7 +14,7 @@ from .mle import fit_diagnostics, fit_theta
 
 logger = logging.getLogger(__name__)
 
-# §6.5, in order, then the diagnostics that §9.6 asks to be surfaced on every fit.
+# The profile table's columns, in order, then the diagnostics surfaced on every fit.
 PROFILE_COLUMNS = ["subject_id", "dimension", "n_items", "theta", "se", "ci95_lower",
                    "ci95_upper", "converged", "reference_ll", "gof", "pseudo_r2"]
 DIAGNOSTIC_COLUMNS = ["skip_reason", "frac_orthogonal", "n_distinct_intervals", "outcome_rate",
@@ -96,6 +96,6 @@ def _fit_cell(cell, subject, dimension, min_items, fit_kwargs):
                reference_ll=fit["reference_ll"], gof=fit["gof"], pseudo_r2=fit["pseudo_r2"],
                n_attempts=fit.get("n_attempts"), n_converged=fit.get("n_converged"),
                restart_theta_std=fit.get("restart_theta_std"))
-    # A non-converged fit with a tight interval is a lie (§9.6): say so in the same row.
+    # A non-converged fit with a tight interval misleads: say so in the same row.
     row["warnings"] = "; ".join(fit_diagnostics(demands, success, fit=fit)["warnings"])
     return row

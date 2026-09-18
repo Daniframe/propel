@@ -1,4 +1,4 @@
-"""A provider that answers from a script: CLAUDE.md §4.4.
+"""A provider that answers from a script.
 
 It ships in the package rather than in the tests so that the annotation layer can be exercised
 end to end, by us and by anyone extending the pipeline, without spending anything.

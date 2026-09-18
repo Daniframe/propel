@@ -1,4 +1,4 @@
-"""The propensity response model: CLAUDE.md §9.1, Eq. 5 of arXiv 2602.18182.
+"""The propensity response model: Eq. 5 of arXiv 2602.18182.
 
 P(success | theta) for one item is a normalised product of two logistics: a bell over the
 propensity axis that peaks at exactly 1.0 at the midpoint of the item's demand interval

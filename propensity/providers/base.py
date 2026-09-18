@@ -1,4 +1,4 @@
-"""The one narrow protocol the core depends on: CLAUDE.md §4.2.
+"""The one narrow protocol the core depends on.
 
 Everything upstream of a provider talks to `LLMProvider` and nothing else. Anything a provider
 cannot do is emulated by the core, so a provider without a batch API still works.
@@ -21,7 +21,7 @@ class Completion:
 @dataclass(frozen=True)
 class BatchRequest:
     """One prompt in a batch. `(system, user)` is the transport unit, never one joined string:
-    adapters decide how to deliver the system part (§4.1 rule 6)."""
+    each provider decides how to deliver the system part."""
 
     custom_id: str
     system: str

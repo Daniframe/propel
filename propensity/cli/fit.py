@@ -1,4 +1,4 @@
-"""propel-fit: annotations plus outcomes produce a propensity profile table (CLAUDE.md §6.5).
+"""propel-fit: fit a propensity level per subject and dimension from annotated intervals and 0/1 outcomes.
 
     propel-fit --annotations RA=annotations.jsonl --outcomes outcomes.csv --out profiles.csv
     propel-fit ... --plots plots/      # also draw each cell's curve and surface, and each
@@ -39,7 +39,8 @@ def build_parser():
     parser.add_argument("--dimensions", nargs="+", help="only these dimensions (default: all annotated)")
     parser.add_argument("--min-items", type=int, help="cells below this are recorded but not fitted")
     parser.add_argument("--likelihood", choices=("sum", "product"),
-                        help="'product' only to reproduce published numbers (§9.2)")
+                        help="'sum' (default, stable) or 'product' (only to reproduce published "
+                             "numbers exactly)")
     parser.add_argument("--no-robust", action="store_true", help="a single fit attempt, no guarded restarts")
     parser.add_argument("--plots", metavar="DIR",
                         help="also draw every cell's propensity curve and surface, and every "

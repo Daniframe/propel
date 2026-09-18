@@ -14,7 +14,7 @@ class ProviderError(PropensityError):
 
 
 class ContractError(PropensityError, ValueError):
-    """Input data violates a data contract (CLAUDE.md §6).
+    """Input data breaks a data contract: a file's format, its ids, or its values.
 
     `rows` holds the offending rows (or column names) so callers can report them.
     """

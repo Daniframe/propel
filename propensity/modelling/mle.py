@@ -1,5 +1,5 @@
 """Maximum-likelihood fit of one subject's propensity level theta on one dimension:
-CLAUDE.md §9.2–9.4 and §9.6, Eq. 6 of arXiv 2602.18182.
+Eq. 6 of arXiv 2602.18182.
 """
 
 import numpy as np
@@ -12,7 +12,7 @@ P_CLIP = 1e-10
 LIKELIHOODS = ("sum", "product")
 _EDGE = 1e-6  # a restart this close to restart_range's bounds is hugging the boundary
 
-# §9.6 thresholds
+# Diagnostic thresholds: see fit_diagnostics
 MIN_ITEMS_WARN = 50
 ORTHOGONAL_WARN = 0.5
 ORTHOGONAL_REFUSE = 0.9
@@ -26,7 +26,7 @@ def neg_log_likelihood(theta, demands, success, k=1.0, *, likelihood="sum", min_
 
     likelihood="sum" is the stable form. "product" multiplies N probabilities before taking
     the log, which underflows to inf for N in the hundreds; it survives only to reproduce
-    published numbers bit for bit (CLAUDE.md §9.2).
+    published numbers bit for bit.
     """
     theta = float(np.ravel(theta)[0])  # scipy passes a 1-element array
     success = np.asarray(success, dtype=float)
@@ -49,7 +49,7 @@ def fit_theta(demands, success, *, k=1.0, x_init=None, n_bins=20, lowess_frac=0.
     x_init: starting point; by default the argmax of the LOWESS-smoothed success curve over
         interval centres, because a cold start at 0 lands in the wrong optimum on skewed banks.
     robust: when the first (unbounded BFGS) attempt does not converge, try up to
-        `max_retries` bounded restarts (§9.4). Never on all-0 or all-1 outcomes, which have no
+        `max_retries` bounded restarts. Never on all-0 or all-1 outcomes, which have no
         interior maximum to find.
 
     Returns theta_hat, se, ci95_lower, ci95_upper, convergence, reference_ll (log-likelihood
@@ -132,7 +132,7 @@ def fit_theta(demands, success, *, k=1.0, x_init=None, n_bins=20, lowess_frac=0.
 
 
 def fit_diagnostics(demands, success, fit=None) -> dict:
-    """§9.6: the checks that catch unusable item banks. Pass the fit_theta result as `fit` to
+    """The checks that catch unusable item banks. Pass the fit_theta result as `fit` to
     also flag a fit that did not converge. `refuse` is True when the bank is too orthogonal
     for theta to be identified at all.
     """
@@ -188,7 +188,8 @@ def _as_arrays(demands, success):
 
 
 def _lowess_start(demands, success, n_bins, lowess_frac):
-    """§9.3 step 1: argmax of the LOWESS-smoothed, binned success curve over interval centres."""
+    """The starting point: the argmax of the LOWESS-smoothed, binned success curve over
+    interval centres."""
     curve = build_empirical_curve(demands, success, n_bins=n_bins, lowess_frac=lowess_frac)
     smoothed = curve["lowess_y"]
     if len(smoothed) < 2 or not np.all(np.isfinite(smoothed)):  # nothing to take an argmax of

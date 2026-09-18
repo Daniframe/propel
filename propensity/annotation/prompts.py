@@ -1,4 +1,4 @@
-"""Assembling the annotation prompt: CLAUDE.md §7.3.
+"""Assembling the annotation prompt.
 
 The byte layout of `user` is validated prompt text: this exact wording produced the project's
 existing annotation data. Do not reformat, re-indent or insert separators. The seams are
@@ -27,5 +27,5 @@ def build_annotation_prompt(
 
 def as_single_string(system: str, user: str) -> str:
     """For a provider whose API takes only one input field. Which providers need this, and how
-    they deliver the system part otherwise, is the adapter's business (§4.1 rule 6)."""
+    they deliver the system part otherwise, is each provider's business."""
     return system + user

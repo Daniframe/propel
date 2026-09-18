@@ -1,4 +1,4 @@
-"""propel-annotate: instances plus a rubric produce a demand interval per instance (§6.2).
+"""propel-annotate: label task instances with propensity demand intervals, using an LLM and a rubric.
 
     propel-annotate run    --instances items.jsonl --dimension RA --out RA_annotations.jsonl
     propel-annotate submit --instances items.jsonl --dimension RA --out RA_annotations.jsonl
@@ -23,6 +23,7 @@ from ..annotation import (
     annotate,
     build_requests,
     collect,
+    load_dimensions,
     load_presentation,
     load_rubric,
     rows_from_completions,
@@ -30,7 +31,8 @@ from ..annotation import (
     summarise,
     wait_for_batch,
 )
-from ..errors import ContractError, PropensityError
+from ..annotation.rubrics import DEFAULT_VERSION
+from ..errors import ContractError, PropensityError, ProviderError
 from ..modelling.io import load_instances, write_table
 from ..providers import get_provider
 from . import load_config, load_dotenv_if_available
@@ -38,6 +40,7 @@ from . import load_config, load_dotenv_if_available
 DEFAULT_CONFIG = "config/annotation.yaml"
 # Never written into a job file, which sits on disk next to the annotations.
 SECRET_OPTIONS = ("api_key", "token", "secret", "password")
+JOB_CONFIG_HELP = "accepted for symmetry; the job file holds every setting"
 
 
 def build_parser():
@@ -48,16 +51,21 @@ def build_parser():
         command.add_argument("--instances", required=True, help="instances file (.jsonl or .csv)")
         command.add_argument("--dimension", required=True, help="dimension code, e.g. RA")
         command.add_argument("--out", required=True, help="where to write the annotation rows")
-        command.add_argument("--propensity-name", help="the trait in words, as the prompt names it")
-        command.add_argument("--rubrics-dir")
-        command.add_argument("--rubric-version")
+        command.add_argument("--propensity-name",
+                             help="the trait in words, as the prompt names it (default: the catalogue's)")
+        command.add_argument("--rubrics-dir",
+                             help="a rubrics directory of your own (default: the rubrics PROPEL ships)")
+        command.add_argument("--rubric-version",
+                             help="rubric version: v2 reads {CODE}/{CODE}_v2.md (default: the catalogue's)")
         command.add_argument("--provider", help="provider name, e.g. openai or mock")
-        command.add_argument("--model")
+        command.add_argument("--model", help="model name; for azure, the deployment name")
         command.add_argument("--provider-option", action="append", default=[], metavar="KEY=VALUE",
                              help="extra provider argument, e.g. base_url=... (repeatable)")
-        command.add_argument("--max-workers", type=int)
-        command.add_argument("--max-retries", type=int)
-        command.add_argument("--config", default=DEFAULT_CONFIG)
+        command.add_argument("--max-workers", type=int, help="parallel calls for run (default: 8)")
+        command.add_argument("--max-retries", type=int,
+                             help="retries per instance after a provider error (default: 3)")
+        command.add_argument("--config", default=DEFAULT_CONFIG,
+                             help=f"settings file (default: {DEFAULT_CONFIG})")
 
     with_inputs(sub.add_parser("run", help="one call per instance (the reference path)"))
     submit_command = sub.add_parser("submit", help="send a batch and write a job file")
@@ -66,15 +74,15 @@ def build_parser():
                                 help="poll until the batch finishes, then fetch it")
 
     status_command = sub.add_parser("status", help="ask how a submitted batch is doing")
-    status_command.add_argument("--job", required=True)
-    status_command.add_argument("--config", default=DEFAULT_CONFIG)
+    status_command.add_argument("--job", required=True, help="the .job.json file submit wrote")
+    status_command.add_argument("--config", default=DEFAULT_CONFIG, help=JOB_CONFIG_HELP)
 
     fetch_command = sub.add_parser("fetch", help="collect a finished batch into annotation rows")
-    fetch_command.add_argument("--job", required=True)
+    fetch_command.add_argument("--job", required=True, help="the .job.json file submit wrote")
     fetch_command.add_argument("--out", help="override the job's output path")
     fetch_command.add_argument("--force", action="store_true",
                                help="fetch even though the prompts no longer match the job")
-    fetch_command.add_argument("--config", default=DEFAULT_CONFIG)
+    fetch_command.add_argument("--config", default=DEFAULT_CONFIG, help=JOB_CONFIG_HELP)
     return parser
 
 
@@ -103,30 +111,41 @@ def resolve(args):
             raise ContractError(f"--provider-option takes KEY=VALUE, got {pair!r}")
         options[key.strip()] = coerce(value)
 
+    rubrics_dir = args.rubrics_dir or config.get("rubrics_dir")  # None: the packaged rubrics
+    catalogued = load_dimensions(rubrics_dir).get(args.dimension)
     settings = {
         "provider": args.provider or config.get("provider"),
         "model": args.model or config.get("model"),
         "options": options,
-        "rubrics_dir": args.rubrics_dir or config.get("rubrics_dir", "rubrics"),
-        "rubric_version": args.rubric_version or config.get("rubric_version", "v1"),
+        "rubrics_dir": rubrics_dir,
+        "rubric_version": (args.rubric_version or config.get("rubric_version")
+                           or (catalogued.version if catalogued else DEFAULT_VERSION)),
         "temperature": config.get("temperature", 0.0),
         "max_tokens": config.get("max_tokens"),
         "max_workers": args.max_workers or config.get("max_workers", 8),
         "max_retries": config.get("max_retries", 3) if args.max_retries is None else args.max_retries,
         "poll_interval": config.get("poll_interval_s", 60),
-        "propensity_name": args.propensity_name or (config.get("dimensions") or {}).get(args.dimension),
+        "propensity_name": (args.propensity_name or (config.get("dimensions") or {}).get(args.dimension)
+                            or (catalogued.name if catalogued else None)),
     }
     if not settings["provider"] or not settings["model"]:
         raise ContractError("no provider or model; pass --provider and --model, or set them in "
                             f"{args.config}")
     if not settings["propensity_name"]:
-        raise ContractError(f"no name in words for dimension {args.dimension!r}; add it under "
-                            f"'dimensions' in {args.config}, or pass --propensity-name")
+        raise ContractError(f"no name in words for dimension {args.dimension!r}: it is not in the "
+                            "dimension catalogue; pass --propensity-name, or add it under "
+                            f"'dimensions' in {args.config}")
     return settings
 
 
 def build_provider(name, model, options):
-    return get_provider(name, model=model, **options)
+    try:
+        return get_provider(name, model=model, **options)
+    except (PropensityError, ImportError):
+        raise
+    except Exception as exc:  # an unknown option, or a vendor SDK refusing to start
+        raise ProviderError(f"could not start the {name!r} provider: {type(exc).__name__}: "
+                            f"{exc}") from exc
 
 
 def prompts_digest(requests):
@@ -193,7 +212,7 @@ def do_submit(args):
         "dimension": args.dimension,
         "propensity_name": settings["propensity_name"],
         "instances": str(args.instances),
-        "rubrics_dir": str(settings["rubrics_dir"]),
+        "rubrics_dir": None if settings["rubrics_dir"] is None else str(settings["rubrics_dir"]),
         "rubric_version": settings["rubric_version"],
         "out": str(args.out),
         "n_requests": len(requests),
@@ -249,6 +268,9 @@ def do_fetch(args):
 
     provider = build_provider(job["provider"], job["model"], job.get("provider_options") or {})
     state = provider.poll_batch(job["batch_id"])
+    if state in ("failed", "cancelled"):
+        print(f"batch {job['batch_id']} ended as {state}; nothing to fetch. Submit it again.")
+        return 1
     if state != "completed":
         print(f"batch {job['batch_id']} is {state}; nothing to fetch yet")
         return 1
@@ -275,7 +297,7 @@ def main(argv=None):
     commands = {"run": do_run, "submit": do_submit, "status": do_status, "fetch": do_fetch}
     try:
         return commands[args.command](args)
-    except PropensityError as exc:
+    except (PropensityError, ImportError) as exc:  # ImportError names the extra to install
         print(f"error: {exc}", file=sys.stderr)
         return 2
 

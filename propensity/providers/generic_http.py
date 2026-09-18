@@ -1,9 +1,9 @@
-"""A last resort, for an endpoint no other adapter covers: CLAUDE.md §4.4.
+"""A last resort, for an endpoint no other adapter covers.
 
 The caller supplies the URL, any headers, and two callables: `build_payload` turns a prompt into
 the JSON body the endpoint expects, and `extract_text` pulls the answer back out of the JSON it
-returns. How the system part is delivered is up to `build_payload` (§4.1 rule 6). Not
-batch-capable. httpx is imported lazily.
+returns. How the system part is delivered is up to `build_payload`. Not batch-capable.
+httpx is imported lazily.
 """
 
 import importlib
@@ -54,7 +54,7 @@ class GenericHTTPProvider:
             response.raise_for_status()
             raw = response.json()
             text = self.extract_text(raw)
-        except Exception as exc:  # never raise: the run records failures and carries on (§4.2)
+        except Exception as exc:  # never raise: the run records failures and carries on
             return Completion(text="", raw=raw, error=f"{type(exc).__name__}: {exc}")
         if not text:
             return Completion(text="", raw=raw, error="the provider returned an empty response")

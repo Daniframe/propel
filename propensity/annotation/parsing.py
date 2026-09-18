@@ -1,4 +1,4 @@
-"""Extracting the demand interval from an annotator's response: CLAUDE.md §7.4.
+"""Extracting the demand interval from an annotator's response.
 
 The contract is that the last line of the response is `<FINAL_RANGE>[LB, UB]</FINAL_RANGE>` and
 nothing follows it. Two legacy phrasings are accepted as fallbacks, because earlier tooling

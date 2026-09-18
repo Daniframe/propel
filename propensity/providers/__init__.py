@@ -1,4 +1,4 @@
-"""Provider adapters, and the registry that resolves them by name: CLAUDE.md §4.
+"""Provider adapters, and the registry that resolves them by name.
 
 The core depends on the `LLMProvider` protocol in `base.py` and nothing else. Only modules in
 this package may import a vendor SDK, and each imports lazily, inside the constructor or the

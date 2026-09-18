@@ -1,4 +1,4 @@
-"""The empirical propensity curve: CLAUDE.md §10.1.
+"""The empirical propensity curve.
 
 A data structure only. Rendering lives in plotting.py, so importing this never needs matplotlib.
 """

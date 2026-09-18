@@ -1,4 +1,4 @@
-"""OpenAI, and anything that speaks its API: CLAUDE.md §4.4.
+"""OpenAI, and anything that speaks its API.
 
 `base_url` points this same adapter at a self-hosted vLLM or Ollama server, LM Studio,
 OpenRouter, Together or an in-house gateway. The SDK is imported lazily.
@@ -40,7 +40,7 @@ class OpenAICompatProvider:
         self.send_temperature = send_temperature
         if not send_temperature:
             logger.warning("temperature is not sent to %s:%s, so its intervals may differ between "
-                           "reruns (CLAUDE.md §8)", self.name, model)
+                           "reruns", self.name, model)
         self.client = client if client is not None else self._client(
             api_key, api_key_env or self.api_key_env, base_url, client_options)
 
@@ -61,7 +61,7 @@ class OpenAICompatProvider:
         try:
             response = self.client.chat.completions.create(
                 **self.request_body(system, user, temperature, max_tokens))
-        except Exception as exc:  # never raise: the run records failures and carries on (§4.2)
+        except Exception as exc:  # never raise: the run records failures and carries on
             return Completion(text="", error=f"{type(exc).__name__}: {exc}")
         raw = response.model_dump() if hasattr(response, "model_dump") else None
         text = response.choices[0].message.content if response.choices else None
@@ -70,7 +70,7 @@ class OpenAICompatProvider:
         return Completion(text=text, raw=raw, usage=(raw or {}).get("usage"))
 
     def request_body(self, system: str, user: str, temperature: float, max_tokens) -> dict:
-        """The system part travels as a `system` role message here (§4.1 rule 6)."""
+        """The request body: the system part travels as a `system` role message here."""
         body = {"model": self.model,
                 "messages": [{"role": "system", "content": system},
                              {"role": "user", "content": user}]}

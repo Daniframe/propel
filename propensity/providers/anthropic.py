@@ -1,4 +1,4 @@
-"""Anthropic's Messages API: CLAUDE.md §4.4.
+"""Anthropic's Messages API.
 
 The system part travels as the top-level `system` parameter. `max_tokens` is required by the API,
 and defaults generously here because current models think before answering and the thinking
@@ -37,7 +37,7 @@ class AnthropicProvider:
         self.request_options = dict(request_options or {})
         if not send_temperature:
             logger.warning("temperature is not sent to %s:%s, so its intervals may differ between "
-                           "reruns (CLAUDE.md §8)", self.name, model)
+                           "reruns", self.name, model)
         self.client = client if client is not None else self._client(
             api_key, api_key_env or self.api_key_env, client_options)
 
@@ -56,12 +56,12 @@ class AnthropicProvider:
             params["extra_body"] = {"temperature": params.pop("temperature")}
         try:
             message = self.client.messages.create(**params)
-        except Exception as exc:  # never raise: the run records failures and carries on (§4.2)
+        except Exception as exc:  # never raise: the run records failures and carries on
             return Completion(text="", error=f"{type(exc).__name__}: {exc}")
         return _completion_from(message)
 
     def params(self, system: str, user: str, temperature: float, max_tokens) -> dict:
-        """The system part is a top-level parameter here (§4.1 rule 6)."""
+        """The request body: the system part is a top-level parameter here."""
         params = {"model": self.model, "max_tokens": max_tokens or DEFAULT_MAX_TOKENS,
                   "system": system, "messages": [{"role": "user", "content": user}]}
         if self.send_temperature:

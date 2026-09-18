@@ -9,7 +9,7 @@ def load_config(path, section=None) -> dict:
     """Reads a YAML settings file, returning {} when it is not there.
 
     Command-line flags override whatever comes from here. Credentials never live in these
-    files: each provider adapter reads its own environment variables (CLAUDE.md §4.1).
+    files: each provider reads its own environment variables.
     """
     path = Path(path)
     if not path.exists():

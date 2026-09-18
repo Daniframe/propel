@@ -4,8 +4,11 @@ Public API re-exports only.
 """
 
 from .annotation import (
+    Dimension,
     annotate,
     build_annotation_prompt,
+    get_dimension,
+    load_dimensions,
     load_presentation,
     load_rubric,
     parse_final_range,

@@ -1,8 +1,8 @@
-"""Running an annotation pass: CLAUDE.md §8.
+"""Running an annotation pass.
 
 Both dispatch paths — one call per instance, or the provider's native batch API — build their
 prompts with `build_requests` and write their rows with `rows_from_completions`. Correctness
-therefore cannot depend on which one ran, which is what acceptance test T7 asserts.
+therefore cannot depend on which one ran, and the test suite checks exactly that.
 
 Provider errors are recorded on the row, never raised: a 480-of-500 run has to be visibly
 different from a 500-of-500 one.
@@ -21,7 +21,7 @@ from .prompts import build_annotation_prompt
 
 logger = logging.getLogger(__name__)
 
-# §6.2's canonical fields, in order; the instance's other fields follow them on each row.
+# The canonical fields of an annotation row, in order; the instance's other fields follow them.
 ROW_FIELDS = ("question_id", "dimension", "lower", "upper", "annotator", "explanation",
               "parse_ok", "error", "parse_error", "parse_method")
 DONE_STATES = ("completed", "failed", "cancelled")
@@ -84,7 +84,7 @@ def run_sequential(provider, requests, *, temperature=0.0, max_tokens=None, max_
 
 
 def require_batch(provider) -> None:
-    """Batching is an optional capability, never an assumption (§4.1 rule 5)."""
+    """Batching is an optional capability, never an assumption: raise unless the provider has it."""
     if not isinstance(provider, BatchCapable):
         raise ProviderError(f"provider {getattr(provider, 'name', provider)!r} has no batch API; "
                             "use mode='sequential'")
@@ -131,7 +131,7 @@ def collect(provider, batch_id, requests=None) -> dict[str, Completion]:
 
 
 def rows_from_completions(instances, completions, *, dimension, annotator) -> list[dict]:
-    """One row per input instance, in input order, always — including the failures (§6.2).
+    """One row per input instance, in input order, always — including the failures.
 
     The full response text is kept as `explanation` whatever happened: it is the only audit
     trail. Bounds are null unless the parse succeeded, so a clamped or half-read interval can
@@ -154,14 +154,14 @@ def rows_from_completions(instances, completions, *, dimension, annotator) -> li
             row.update(explanation=completion.text, parse_ok=parsed.parse_ok, lower=parsed.lower,
                        upper=parsed.upper, parse_error=parsed.error, parse_method=parsed.method)
 
-        for key, value in instance.items():  # §6.1: every other field passes through untouched
+        for key, value in instance.items():  # every other field of the instance passes through
             row.setdefault(key, value)
         rows.append(row)
     return rows
 
 
 def summarise(rows) -> str:
-    """The §8 summary line: how many worked, and how each of the rest failed."""
+    """The summary line of a run: how many worked, and how each of the rest failed."""
     ok = sum(1 for row in rows if row["parse_ok"])
     provider_error = sum(1 for row in rows if row["error"])
     parse_failed = len(rows) - ok - provider_error
@@ -172,7 +172,7 @@ def summarise(rows) -> str:
 def annotate(instances, *, provider, dimension, propensity_name, rubric, presentation,
              mode="auto", temperature=0.0, max_tokens=None, max_workers=8, max_retries=3,
              on_progress=None, retry_backoff=1.0, poll_interval=60.0) -> list[dict]:
-    """Annotates every instance on one dimension with one provider, returning §6.2 rows.
+    """Annotates every instance on one dimension with one provider, returning one row each.
 
     mode: "batch" requires a batch-capable provider; "sequential" calls the provider once per
     instance; "auto" takes the batch API when there is one and says so when it falls back.

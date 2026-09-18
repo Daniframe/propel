@@ -1,4 +1,4 @@
-"""Surfaces over the grid of demand intervals: CLAUDE.md §10.2, and what an item bank looks like.
+"""Surfaces over the grid of demand intervals, and what an item bank looks like.
 
 - `build_empirical_surface`: observed success per interval, for one subject.
 - `build_model_surface`: the success Eq. 5 predicts per interval, for a given theta.
@@ -26,7 +26,7 @@ def build_empirical_surface(demands_int, success, *, r1=-3, r2=3) -> dict:
         grid: the integer values used for both axes
 
     Both frames are indexed by b_u down the rows and b_l across the columns, the orientation
-    plotting.py draws. The three cell states of §10.2 follow from them: observed is
+    plotting.py draws. The three cell states follow from them: observed is
     `counts > 0`; valid but unobserved is `b_l <= b_u` with `counts == 0`; impossible is
     `b_l > b_u`. This surface is how an item bank with no informative cells is spotted.
     """

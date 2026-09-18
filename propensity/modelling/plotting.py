@@ -1,4 +1,4 @@
-"""Optional renderers for curves, surfaces and item banks: CLAUDE.md §10.
+"""Optional renderers for curves, surfaces and item banks.
 
 Everything here draws the plain data structures that curves.py, surfaces.py and the fit produce.
 matplotlib and seaborn are imported only when something is drawn, so importing
@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 SUCCESS_COLOURS = ["#d7191c", "#ffff99", "#1a9641"]  # red, yellow, green: the paper's scale
 DISTRIBUTION_COLOURS = "Reds"
 UNOBSERVED_COLOUR = "whitesmoke"
-INVALID_COLOUR = "lightgray"  # impossible cells, when asked to show them: the original figures' fill
+INVALID_COLOUR = "lightgray"  # impossible cells, when asked to show them
 UNOBSERVED = -1.0      # below the colour scale, so a valid but empty cell takes the "under" colour
-DISPLAY_JITTER = 0.25  # §10.1: integer intervals otherwise stack into a handful of columns
+DISPLAY_JITTER = 0.25  # integer intervals otherwise stack into a handful of columns
 LEGEND_BELOW = {"loc": "upper center", "bbox_to_anchor": (0.5, -0.12), "frameon": False}
 
 
@@ -48,15 +48,15 @@ def require_matplotlib():
 
 def plot_propensity_curve(curve, *, theta=None, ci95=None, converged=True, incited=None,
                           r1=-3, r2=3, title=None, ax=None):
-    """§10.1: the fraction of successes binned by interval centre, its LOWESS smooth, a solid
-    line at theta and dashed lines at its 95% confidence bounds.
+    """The propensity curve: the fraction of successes binned by interval centre, its
+    LOWESS smooth, a solid line at theta and dashed lines at its 95% confidence bounds.
 
     curve: from `build_empirical_curve`, built with `jitter=0.25` for display.
     theta, ci95: the fit, as a level and a (lower, upper) pair. Leave theta None or NaN for a
         cell that was not fitted, and the data is drawn without an estimate.
     converged: False puts "did not converge" beside the estimate, since a tight interval around
-        a failed fit misleads (§9.6).
-    incited: the level the subject was incited to, when known (§14.1), drawn in grey.
+        a failed fit misleads.
+    incited: the level the subject was incited to, when known, drawn in grey.
     Returns the Axes, a new one unless `ax` is given.
     """
     require_matplotlib()
@@ -87,7 +87,8 @@ def plot_propensity_curve(curve, *, theta=None, ci95=None, converged=True, incit
 
 
 def plot_propensity_surface(surface, *, theta=None, ci95=None, converged=True, title=None, ax=None):
-    """§10.2: success over the grid of interval bounds, `b_l` across and `b_u` up.
+    """The propensity surface: success over the grid of interval bounds, `b_l` across and
+    `b_u` up.
 
     The three cell states stay distinct: an observed cell is coloured red to green by its mean
     success and shows its count; a valid (`b_l <= b_u`) but unobserved cell is whitesmoke; an
