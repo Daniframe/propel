@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+- **Every annotation records what produced it.** Rows end with `rubric_version`,
+  `rubric_sha256` and `propensity_version`. The command line always knows the version; in
+  Python, pass `rubric_version=` to `annotate`, or let it recognise a packaged rubric from its
+  text. The SHA-256 identifies any rubric, packaged or your own.
+- **Mixed rubrics are flagged.** `load_annotations` warns when one dimension's rows come from
+  different rubrics: their intervals are not comparable.
+
 ## 0.1.2
 
 - **Eleven new dimensions,** each with a `v1` rubric: agreeableness (`Ag`), altruism (`Al`),

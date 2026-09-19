@@ -4,7 +4,7 @@ Public API re-exports only.
 """
 
 # Defined before the imports below: the annotation runner records it on every row.
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from .annotation import (
     Dimension,
