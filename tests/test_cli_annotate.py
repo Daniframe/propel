@@ -1,6 +1,7 @@
 """The propel-annotate subcommands: run, submit, status and fetch."""
 
 import json
+import os
 import subprocess
 import sys
 
@@ -271,3 +272,31 @@ def test_the_module_entry_point_is_runnable():
                           capture_output=True, text=True, check=False)
     assert done.returncode == 0
     assert "propel-annotate" in done.stdout
+
+
+# --- .env ----------------------------------------------------------------------------------
+
+def test_a_dotenv_file_in_the_working_directory_is_loaded(tmp_path, monkeypatch):
+    pytest.importorskip("dotenv")
+    from propensity.cli import load_dotenv_if_available
+
+    monkeypatch.delenv("PROPEL_TEST_KEY", raising=False)  # and removes it again afterwards
+    (tmp_path / ".env").write_text("PROPEL_TEST_KEY=from-the-working-directory\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert load_dotenv_if_available()
+    assert os.environ["PROPEL_TEST_KEY"] == "from-the-working-directory"
+
+
+def test_a_dotenv_file_above_the_working_directory_is_loaded_and_the_environment_wins(tmp_path, monkeypatch):
+    pytest.importorskip("dotenv")
+    from propensity.cli import load_dotenv_if_available
+
+    (tmp_path / ".env").write_text("PROPEL_TEST_KEY=from-the-file\nPROPEL_TEST_OTHER=from-the-file\n",
+                                   encoding="utf-8")
+    (tmp_path / "project").mkdir()
+    monkeypatch.chdir(tmp_path / "project")
+    monkeypatch.setenv("PROPEL_TEST_KEY", "from-the-shell")
+    monkeypatch.delenv("PROPEL_TEST_OTHER", raising=False)
+    assert load_dotenv_if_available()
+    assert os.environ["PROPEL_TEST_KEY"] == "from-the-shell"
+    assert os.environ["PROPEL_TEST_OTHER"] == "from-the-file"

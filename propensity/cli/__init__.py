@@ -22,11 +22,15 @@ def load_config(path, section=None) -> dict:
 def load_dotenv_if_available() -> bool:
     """Loads a .env file when python-dotenv is installed, for provider credentials.
 
-    Optional on purpose: the adapters read the environment, and how it got populated is not
-    their business. Returns whether anything was loaded.
+    The file is looked for in the working directory, then in each directory above it. (Left
+    to itself, python-dotenv would start from this module's folder, which for an installed
+    package is inside the environment, never where the user works.) Variables already set in
+    the environment are kept. Optional on purpose: the adapters read the environment, and how
+    it got populated is not their business. Returns whether a file was found and loaded.
     """
     try:
-        from dotenv import load_dotenv
+        from dotenv import find_dotenv, load_dotenv
     except ImportError:
         return False
-    return bool(load_dotenv())
+    path = find_dotenv(usecwd=True)
+    return bool(path) and bool(load_dotenv(path))

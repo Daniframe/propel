@@ -29,7 +29,8 @@ propel-annotate {run,submit,status,fetch} ...
 much, and take minutes to hours.
 
 With the `dotenv` extra installed, every subcommand first loads `.env` from the working
-directory.
+directory, or from the nearest folder above it that has one. Variables already set in the
+environment win.
 
 ### Options shared by `run` and `submit`
 

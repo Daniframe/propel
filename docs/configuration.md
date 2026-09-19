@@ -117,7 +117,8 @@ The same settings are keyword arguments of `fit_theta` and `fit_profiles` in Pyt
 
 Every provider takes `api_key_env` to read a different variable, and `api_key` to pass the key
 directly (Python only; keep keys out of command lines). With the `dotenv` extra installed,
-`propel-annotate` loads `.env` from the working directory first.
+`propel-annotate` loads `.env` from the working directory (or the nearest folder above it
+that has one) first.
 
 ## Using files from elsewhere
 

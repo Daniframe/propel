@@ -78,15 +78,17 @@ export OPENAI_API_KEY="sk-..."           # bash, zsh
 $env:OPENAI_API_KEY = "sk-..."           # PowerShell
 ```
 
-Or install the `dotenv` extra and put them in a `.env` file in the working directory, which
-`propel-annotate` loads automatically:
+Or install the `dotenv` extra and put them in a `.env` file in the working directory (or a
+folder above it), which `propel-annotate` loads automatically. A variable already set in the
+environment takes precedence over the file:
 
 ```ini
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Keep `.env` out of version control.
+Keep `.env` out of version control. The Python API does not read `.env` by itself: call
+`dotenv.load_dotenv()` first, or set the variables in the environment.
 
 ## Shell syntax in these docs
 
