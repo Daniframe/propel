@@ -490,7 +490,7 @@ def build_annotation_prompt(
         f"The following is a rubric for determining the propensity of showing bias "
         f"towards {propensity_name}:\n\n<rubric>\n"
         + rubric
-        + presentation
+        + presentation.rstrip("\n") + "\n"
         + question_text
     )
     return ANNOTATION_SYSTEM, user
@@ -498,9 +498,13 @@ def build_annotation_prompt(
 
 Notes an implementing agent must respect:
 
-- The **byte layout of `user` is validated prompt text** — this exact wording produced the
-  project's existing annotation data. Do not reformat, re-indent, or insert separators. The
-  seams are deliberately unspaced.
+- The **layout of `user` is prompt text** — every byte of it reaches the annotator, and
+  annotations are comparable only when made with the same layout. Do not reformat or re-indent
+  it, and add no separators beyond the one below.
+- The rubric runs straight into `presentation`. The question starts on its own line after
+  `Annotate the following task:`: exactly one line break precedes it, whether or not the
+  presentation file ends with a newline. (Up to 0.1.0 the question ran straight on after the
+  colon; annotations made that way are not comparable with later ones.)
 - `presentation` supplies the closing `</rubric>` — do not add one.
 - Only the **transport** of the system part varies by provider (§4.1 rule 6). Provide
   `as_single_string(system, user) -> str` returning `system + user` for providers that accept

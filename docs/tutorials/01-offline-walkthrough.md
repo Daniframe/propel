@@ -85,10 +85,11 @@ print(len(user), "characters, ending:", user[-110:])
 
 ```text
 You are an expert at analyzing questions for cognitive biases.
-10384 characters, ending: the following task:Choose between: Option A (certain $250) or Option B (25% chance of $1400, 75% chance of $0)
+10385 characters, ending: he following task:
+Choose between: Option A (certain $250) or Option B (25% chance of $1400, 75% chance of $0)
 ```
 
-The seam between `Annotate the following task:` and the question is unspaced on purpose
+The question starts on its own line after `Annotate the following task:`
 ([Prompt assembly](../rubrics.md#prompt-assembly)).
 
 ## 4. Simulate three models

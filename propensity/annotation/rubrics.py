@@ -127,8 +127,8 @@ def load_rubric(code: str, rubrics_dir=None, version=None) -> str:
 def load_presentation(rubrics_dir=None) -> str:
     """The reasoning procedure and output contract every dimension shares.
 
-    It opens with the closing `</rubric>` tag and ends with "Annotate the following task:", so
-    the prompt adds neither.
+    It opens with the closing `</rubric>` tag and ends with "Annotate the following task:"; the
+    prompt adds the line break before the question.
     """
     return _read(_root(rubrics_dir) / PRESENTATION_FILE)
 

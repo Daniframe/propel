@@ -104,8 +104,9 @@ build_annotation_prompt(propensity_name, rubric, presentation, question_text) ->
 
 Returns `(system, user)` for one instance:
 - `system` is `ANNOTATION_SYSTEM`;
-- `user` is the rubric preamble, the rubric, the presentation block and the question, joined
-  byte for byte ([Prompt assembly](../rubrics.md#prompt-assembly)).
+- `user` is the rubric preamble, the rubric and the presentation block, joined as they are,
+  then the question on its own line: exactly one line break precedes it, however the
+  presentation block ends ([Prompt assembly](../rubrics.md#prompt-assembly)).
 
 | Parameter | Meaning |
 |---|---|

@@ -1,8 +1,9 @@
 """Assembling the annotation prompt.
 
-The byte layout of `user` is validated prompt text: this exact wording produced the project's
-existing annotation data. Do not reformat, re-indent or insert separators. The seams are
-deliberately unspaced, and `presentation` supplies the closing `</rubric>` tag.
+The layout of `user` is prompt text: every byte of it reaches the annotator, and annotations
+are comparable only when made with the same layout. Do not reformat or re-indent it. The rubric
+runs straight into `presentation`, which supplies the closing `</rubric>` tag; the question
+starts on its own line after the presentation block.
 """
 
 ANNOTATION_SYSTEM = "You are an expert at analyzing questions for cognitive biases."
@@ -14,12 +15,13 @@ def build_annotation_prompt(
     presentation: str,        # full presentation block text
     question_text: str,
 ) -> tuple[str, str]:
-    """Returns (system, user)."""
+    """Returns (system, user). The question follows the presentation block after exactly one
+    line break, whether or not the block's file ends with a newline."""
     user = (
         f"The following is a rubric for determining the propensity of showing bias "
         f"towards {propensity_name}:\n\n<rubric>\n"
         + rubric
-        + presentation
+        + presentation.rstrip("\n") + "\n"
         + question_text
     )
     return ANNOTATION_SYSTEM, user

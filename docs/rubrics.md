@@ -25,10 +25,12 @@ covers the catalogue, updating a rubric, and adding a dimension.
   with the same layout instead.
 - **Encoding.** Files are read as UTF-8 and used as stored: nothing strips, re-indents or
   re-encodes them. A file that is not valid UTF-8 is refused with an error saying so.
-- **Whitespace is part of the prompt.** `presentation.md` and most shipped rubrics end without
-  a final newline, which keeps the prompt's seams exactly as validated (`Ex_v1.md` ends with
-  one). An editor that adds or strips a trailing newline changes every prompt built from that
-  file.
+- **Whitespace is part of the prompt.** A rubric runs straight into the closing `</rubric>`
+  tag, so whether its file ends with a newline shows in every prompt built from it: `RA_v1.md`,
+  `Ul_v1.md` and `BR_v1.md` end without one, the others with one. An editor that adds or strips
+  a trailing newline changes those prompts; the tests' pinned hashes catch it.
+  `presentation.md` is the exception: the question always starts on a new line after it,
+  however the file ends.
 
 ## Rubric structure
 
@@ -103,14 +105,16 @@ system: You are an expert at analyzing questions for cognitive biases.
 user:   The following is a rubric for determining the propensity of showing bias towards {name}:
 
         <rubric>
-        {rubric file}{presentation.md}{question_text}
+        {rubric file}{presentation.md}
+        {question_text}
 ```
 
 - **`{name}`** is the trait's name from the catalogue, e.g. `risk aversion`, unless
   `--propensity-name` or `dimensions:` in `config/annotation.yaml` overrides it.
-- **The seams are deliberately unspaced.** The rubric runs straight into `</rubric>`, and the
-  presentation block straight into the question. This layout produced the existing annotation
-  data; changing it changes every interval.
+- **The seams.** The rubric runs straight into `</rubric>`, and the question starts on its own
+  line after `Annotate the following task:`, with exactly one line break whatever the end of
+  `presentation.md`. The layout is part of every prompt: annotations are comparable only when
+  made with the same one. PROPEL 0.1.0 ran the question straight on after the colon.
 - **Transport is the provider's business.** The system part goes as a system message
   (`openai`, `azure`), a top-level `system` parameter (`anthropic`) or `system_instruction`
   (`google`). The `http` provider receives both parts separately; for an API with a single

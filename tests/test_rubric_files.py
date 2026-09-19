@@ -29,7 +29,7 @@ PINNED_SHA256 = {
     "Ex/Ex_v1.md": "dc446ddc4a78c7246f35065dc5873656c4e4028d1a34b05b2a46a30a64635b03",
     "Ul/Ul_v1.md": "0e31ec68be25ae8812d41b2a89f1199f99a229683fdd8d6a3360bdc7b1fa6b7a",
     "BR/BR_v1.md": "98c3fbd56d568fb0ad5b3a4c4a81b9e93a3fe6f8d9070e49285365c48a6fa9c2",
-    "presentation.md": "ac528f3004e2501bbc0335d8931f237dd006ffdee8a21744816c73398d6f46a1",
+    "presentation.md": "ac528f3004e2501bbc0335d8931f237dd006ffdee8a21744816c73398d6f46a1",  # sans final newlines
 }
 
 # Rubrics that predate the structural checks, and the checks they are known to fail. They stay
@@ -46,11 +46,19 @@ def rubric_files():
     return sorted(path.relative_to(RUBRICS_DIR).as_posix() for path in RUBRICS_DIR.glob("*/*.md"))
 
 
+def pinned_bytes(relpath):
+    """The bytes a pin covers. presentation.md's final newlines are left out: the prompt builder
+    ignores them, so an editor that adds or strips one changes no prompt. A rubric file's final
+    newline is part of every prompt, so it is pinned with the rest."""
+    data = (RUBRICS_DIR / relpath).read_bytes()
+    return data.rstrip(b"\n") if relpath == "presentation.md" else data
+
+
 # --- bytes ---------------------------------------------------------------------------------
 
 @pytest.mark.parametrize("relpath", sorted(PINNED_SHA256))
 def test_rubric_bytes_are_pinned(relpath):
-    digest = hashlib.sha256((RUBRICS_DIR / relpath).read_bytes()).hexdigest()
+    digest = hashlib.sha256(pinned_bytes(relpath)).hexdigest()
     assert digest == PINNED_SHA256[relpath], (
         f"{relpath} changed. If that was deliberate, update PINNED_SHA256; "
         "check first that no editor added or removed a final newline.")
@@ -68,10 +76,11 @@ def test_rubric_is_utf8_with_unix_line_endings(relpath):
 
 
 def test_the_presentation_block_opens_and_closes_as_the_prompt_expects():
-    # It closes the <rubric> tag the prompt opens, and the question follows it directly.
+    # It closes the <rubric> tag the prompt opens; the question follows on the next line (the
+    # prompt supplies that line break, so the file's own final newline does not matter).
     text = (RUBRICS_DIR / "presentation.md").read_text(encoding="utf-8")
     assert text.startswith("</rubric>")
-    assert text.endswith("Annotate the following task:")
+    assert text.rstrip("\n").endswith("Annotate the following task:")
     assert "<FINAL_RANGE>[LB, UB]</FINAL_RANGE>" in text
 
 

@@ -137,13 +137,14 @@ The following is a rubric for determining the propensity of showing bias towards
 
 <rubric>
 # DEL
-... esponse must be:
+... sponse must be:
 
 <FINAL_RANGE>[LB, UB]</FINAL_RANGE>
 
 Do not output any additional text after this line.
 
-Annotate the following task:Choose: $50 today or $80 in a week.
+Annotate the following task:
+Choose: $50 today or $80 in a week.
 ```
 
 Read the whole `user` string once, exactly as an annotator will see it.

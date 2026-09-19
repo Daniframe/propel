@@ -27,14 +27,24 @@ PREAMBLE = ("The following is a rubric for determining the propensity of showing
             "towards risk aversion:\n\n<rubric>\n")
 
 
-def test_the_prompt_is_the_four_pieces_and_nothing_else():
+def test_the_prompt_is_the_four_pieces_with_the_question_on_its_own_line():
     rubric, presentation, question = "RUBRIC TEXT", "</rubric>\nprocedure", "Q?"
     system, user = build_annotation_prompt("risk aversion", rubric, presentation, question)
 
     assert system == ANNOTATION_SYSTEM
-    assert user == PREAMBLE + rubric + presentation + question  # no separators at the seams
-    assert user.startswith(PREAMBLE) and user.endswith(question)
-    assert len(user) == len(PREAMBLE) + len(rubric) + len(presentation) + len(question)
+    assert user == PREAMBLE + rubric + presentation + "\n" + question  # nothing else is added
+    assert user.startswith(PREAMBLE) and user.endswith("procedure\nQ?")
+
+
+def test_one_line_break_precedes_the_question_however_the_presentation_block_ends():
+    prompts = {build_annotation_prompt("risk aversion", "R", ending, "Q")[1]
+               for ending in ("</rubric>\nAnnotate:", "</rubric>\nAnnotate:\n", "</rubric>\nAnnotate:\n\n")}
+    assert prompts == {PREAMBLE + "R</rubric>\nAnnotate:\nQ"}
+
+
+def test_the_rubric_runs_straight_into_the_presentation_block():
+    _, user = build_annotation_prompt("risk aversion", "RUBRIC END", "</rubric>\nP", "Q")
+    assert "RUBRIC END</rubric>" in user  # a rubric's own final newline, if any, is all there is
 
 
 def test_the_closing_rubric_tag_comes_from_the_presentation_block_only():
@@ -68,7 +78,7 @@ def test_every_shipped_rubric_builds_a_prompt_that_ends_with_the_question():
         rubric = load_rubric(code)
         _, user = build_annotation_prompt("risk aversion", rubric, presentation, "THE QUESTION")
         assert user.count("</rubric>") == 1, code
-        assert user.endswith("Annotate the following task:THE QUESTION"), code
+        assert user.endswith("Annotate the following task:\nTHE QUESTION"), code
         assert "<FINAL_RANGE>[LB, UB]</FINAL_RANGE>" in user, code
 
 

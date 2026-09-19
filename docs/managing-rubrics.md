@@ -83,8 +83,9 @@ sorted(load_dimensions())    # ['BR', 'Ex', 'RA', 'Ul']
 2. **Never change a dimension's `name` once annotations exist.** The name is inserted into every
    prompt. If it must change, treat it like a new rubric version: annotate again.
 3. **Treat `presentation.md` as part of every rubric.** It is shared by all dimensions, so
-   changing it changes every prompt of every dimension. Change it only in a release that bumps
-   every dimension's version, and say so in the release notes.
+   changing it changes every prompt of every dimension, and annotations made before and after
+   the change are not comparable. Change it only in a release whose notes say so; reproducing
+   earlier annotations then needs the earlier release.
 
 Annotations are comparable only when made with the same rubric version, trait name and
 presentation block. Keep each version's annotation files apart: the `annotator` field records
@@ -236,7 +237,7 @@ Examples:
 
 | Check | Catches |
 |---|---|
-| every rubric file and `presentation.md` has a pinned SHA-256 | any edit, including an editor adding or removing a trailing newline |
+| every rubric file and `presentation.md` has a pinned SHA-256 | any edit, including an editor adding or removing a rubric's trailing newline. `presentation.md` is pinned without its trailing newlines, which no prompt contains |
 | every file is UTF-8 with `\n` line endings | encoding accidents that would change the prompt |
 | every rubric passes `check_rubric` | a missing section, level or example. Only the gaps recorded in `KNOWN_GAPS` are exempt, and nothing may be added there |
 | every folder is catalogued, and every entry's version exists | a rubric the CLI cannot name, or a catalogue entry pointing at nothing |
