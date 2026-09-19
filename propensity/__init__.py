@@ -3,6 +3,7 @@
 Public API re-exports only.
 """
 
+# Defined before the imports below: the annotation runner records it on every row.
 __version__ = "0.1.2"
 
 from .annotation import (

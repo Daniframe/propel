@@ -19,6 +19,7 @@ from .runner import (
     build_requests,
     collect,
     normalise_usage,
+    provenance,
     require_batch,
     rows_from_completions,
     run_sequential,

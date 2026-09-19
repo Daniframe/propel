@@ -56,7 +56,7 @@ print(rows[["question_id", "lower", "upper", "annotator", "parse_ok"]].head(3).t
 ```
 
 ```text
-['question_id', 'dimension', 'lower', 'upper', 'annotator', 'explanation', 'parse_ok', 'error', 'parse_error', 'parse_method', 'input_tokens', 'output_tokens', 'cached_input_tokens', 'question_text', 'source']
+['question_id', 'dimension', 'lower', 'upper', 'annotator', 'explanation', 'parse_ok', 'error', 'parse_error', 'parse_method', 'input_tokens', 'output_tokens', 'cached_input_tokens', 'rubric_version', 'rubric_sha256', 'propensity_version', 'question_text', 'source']
 question_id lower upper   annotator parse_ok
      RA_000    -1     2 mock:mock-1     True
      RA_001    -1     2 mock:mock-1     True

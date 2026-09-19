@@ -71,6 +71,10 @@ normalised to `question_id · dimension · lower · upper · parse_ok`.
 
 Rows that failed to parse are kept, with `parse_ok` false.
 
+**Warns** (`DataWarning`) when the rows of one dimension record different rubrics
+(`rubric_sha256`, or `rubric_version`): intervals annotated with different rubrics are not
+comparable, so fit them separately.
+
 ### `load_outcomes`
 
 ```python

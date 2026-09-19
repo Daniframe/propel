@@ -8,25 +8,30 @@ Provider errors are recorded on the row, never raised: a 480-of-500 run has to b
 different from a 500-of-500 one.
 """
 
+import hashlib
 import logging
 import time
 import warnings
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
+from .. import __version__
 from ..errors import ContractError, DataWarning, ProviderError
 from ..providers.base import BatchCapable, BatchRequest, Completion
 from .parsing import parse_final_range
 from .prompts import build_annotation_prompt
-from .rubrics import check_rubric
+from .rubrics import available_versions, check_rubric, load_rubric
 
 logger = logging.getLogger(__name__)
 
 # Token counts, as normalise_usage reports them; None when the provider gave none.
 USAGE_FIELDS = ("input_tokens", "output_tokens", "cached_input_tokens")
+# What produced a row, as provenance() reports it.
+PROVENANCE_FIELDS = ("rubric_version", "rubric_sha256", "propensity_version")
 # The canonical fields of an annotation row, in order; the instance's other fields follow them.
+# New fields are appended, never inserted, so existing columns keep their places.
 ROW_FIELDS = ("question_id", "dimension", "lower", "upper", "annotator", "explanation",
-              "parse_ok", "error", "parse_error", "parse_method", *USAGE_FIELDS)
+              "parse_ok", "error", "parse_error", "parse_method", *USAGE_FIELDS, *PROVENANCE_FIELDS)
 DONE_STATES = ("completed", "failed", "cancelled")
 MODES = ("auto", "batch", "sequential")
 
@@ -138,13 +143,16 @@ def collect(provider, batch_id, requests=None) -> dict[str, Completion]:
     return results
 
 
-def rows_from_completions(instances, completions, *, dimension, annotator) -> list[dict]:
+def rows_from_completions(instances, completions, *, dimension, annotator, rubric=None,
+                          rubric_version=None) -> list[dict]:
     """One row per input instance, in input order, always — including the failures.
 
     The full response text is kept as `explanation` whatever happened: it is the only audit
     trail. Bounds are null unless the parse succeeded, so a clamped or half-read interval can
-    never reach the fit.
+    never reach the fit. Every row records what produced it (`provenance`): pass the rubric
+    text, and its version when it is not a packaged one.
     """
+    produced_by = provenance(dimension, rubric, rubric_version)
     rows = []
     for instance in instances:
         question_id = str(instance["question_id"])
@@ -163,11 +171,27 @@ def rows_from_completions(instances, completions, *, dimension, annotator) -> li
                        upper=parsed.upper, parse_error=parsed.error, parse_method=parsed.method)
         if completion is not None:
             row.update(normalise_usage(completion.usage))
+        row.update(produced_by)
 
         for key, value in instance.items():  # every other field of the instance passes through
             row.setdefault(key, value)
         rows.append(row)
     return rows
+
+
+def provenance(dimension, rubric=None, rubric_version=None) -> dict:
+    """What produced a row: the rubric version, a SHA-256 of the rubric's exact text, and the
+    PROPEL version (which fixes the prompt layout and the packaged presentation block).
+
+    Without a version, a rubric whose text is one of the packaged versions of `dimension` is
+    recognised; any other rubric is recorded by its hash alone.
+    """
+    if rubric_version is None and rubric is not None:
+        rubric_version = next((version for version in available_versions(dimension)
+                               if load_rubric(dimension, version=version) == rubric), None)
+    return {"rubric_version": rubric_version,
+            "rubric_sha256": None if rubric is None else hashlib.sha256(rubric.encode("utf-8")).hexdigest(),
+            "propensity_version": __version__}
 
 
 def summarise(rows) -> str:
@@ -226,7 +250,7 @@ def summarise_usage(rows) -> str | None:
 
 def annotate(instances, *, provider, dimension, propensity_name, rubric, presentation,
              mode="auto", temperature=0.0, max_tokens=None, max_workers=8, max_retries=3,
-             on_progress=None, retry_backoff=1.0, poll_interval=60.0) -> list[dict]:
+             on_progress=None, retry_backoff=1.0, poll_interval=60.0, rubric_version=None) -> list[dict]:
     """Annotates every instance on one dimension with one provider, returning one row each.
 
     mode: "batch" requires a batch-capable provider; "sequential" calls the provider once per
@@ -234,6 +258,9 @@ def annotate(instances, *, provider, dimension, propensity_name, rubric, present
 
     temperature stays at 0: the intervals are a property of the instance, and have to be stable
     across reruns.
+
+    rubric_version is recorded on every row; a packaged rubric's version is recognised
+    without it.
     """
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
@@ -267,7 +294,8 @@ def annotate(instances, *, provider, dimension, propensity_name, rubric, present
             completions = {request.custom_id: Completion(text="", error=f"batch {batch_id} ended as {state}")
                            for request in requests}
 
-    rows = rows_from_completions(instances, completions, dimension=dimension, annotator=annotator)
+    rows = rows_from_completions(instances, completions, dimension=dimension, annotator=annotator,
+                                 rubric=rubric, rubric_version=rubric_version)
     print(summarise(rows))
     usage = summarise_usage(rows)
     if usage:

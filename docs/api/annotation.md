@@ -172,8 +172,10 @@ Constants: `PATTERNS` (the three `(method, compiled regex)` pairs, in order), `S
 ## Runner
 
 `propensity.annotation.runner`. Constants:
-- `ROW_FIELDS`: the thirteen canonical row fields, in order;
-- `USAGE_FIELDS = ("input_tokens", "output_tokens", "cached_input_tokens")`, the last three;
+- `ROW_FIELDS`: the sixteen canonical row fields, in order. New fields are appended, never
+  inserted;
+- `USAGE_FIELDS = ("input_tokens", "output_tokens", "cached_input_tokens")`, after `parse_method`;
+- `PROVENANCE_FIELDS = ("rubric_version", "rubric_sha256", "propensity_version")`, the last three;
 - `MODES = ("auto", "batch", "sequential")`;
 - `DONE_STATES = ("completed", "failed", "cancelled")`.
 
@@ -202,6 +204,7 @@ Annotates every instance on one dimension with one provider.
 | `on_progress` | `None` | `callable(done, total)`, called after each instance (sequential path) |
 | `retry_backoff` | `1.0` | first retry delay in seconds, doubling each attempt; 0 disables waiting |
 | `poll_interval` | `60.0` | seconds between polls (batch path) |
+| `rubric_version` | `None` | recorded on every row. A packaged rubric's version is recognised from its text without it |
 
 **Returns** one row per instance, in input order, including failures
 ([row format](../data-formats.md#annotations)). It also prints the summary line
@@ -255,13 +258,18 @@ require_batch(provider) -> None
 | `require_batch` | raises `ProviderError` unless the provider is `BatchCapable`; all three above call it |
 
 ```python
-rows_from_completions(instances, completions, *, dimension, annotator) -> list[dict]
+rows_from_completions(instances, completions, *, dimension, annotator, rubric=None,
+                      rubric_version=None) -> list[dict]
+provenance(dimension, rubric=None, rubric_version=None) -> dict
 ```
 
-Parses each completion and returns the rows:
+`rows_from_completions` parses each completion and returns the rows:
 - one row per instance, in input order;
 - an instance without a completion gets `error = "missing from the batch output"`;
-- `annotator` is written on every row, conventionally `f"{provider.name}:{provider.model}"`.
+- `annotator` is written on every row, conventionally `f"{provider.name}:{provider.model}"`;
+- so is `provenance(dimension, rubric, rubric_version)`: the rubric's version (recognised from
+  its text for a packaged rubric), the SHA-256 of its text, and the PROPEL version. Pass
+  `rubric` so that the rows can say which one they came from.
 
 ```python
 summarise(rows) -> str
@@ -282,6 +290,6 @@ requests = build_requests(instances, propensity_name="risk aversion", rubric=rub
 batch_id = submit(provider, requests)
 # ... later, possibly in another process ...
 if provider.poll_batch(batch_id) == "completed":
-    rows = rows_from_completions(instances, collect(provider, batch_id, requests),
-                                 dimension="RA", annotator=f"{provider.name}:{provider.model}")
+    rows = rows_from_completions(instances, collect(provider, batch_id, requests), dimension="RA",
+                                 annotator=f"{provider.name}:{provider.model}", rubric=rubric)
 ```

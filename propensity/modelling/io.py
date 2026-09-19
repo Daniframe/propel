@@ -168,10 +168,27 @@ def load_annotations(source, *, dimension=None) -> pd.DataFrame:
                          if "parse_ok" in frame.columns else True)
     frame["lower"] = _coerce(frame["lower"], _as_bound, name, "lower", frame)
     frame["upper"] = _coerce(frame["upper"], _as_bound, name, "upper", frame)
+    _warn_about_mixed_rubrics(frame, name)
     tidy = frame[["question_id", "dimension", "lower", "upper", "parse_ok"]].reset_index(drop=True)
     tidy = tidy.astype({"lower": float, "upper": float, "parse_ok": bool})
     _validate_annotations(tidy, name)
     return tidy
+
+
+def _warn_about_mixed_rubrics(frame, name):
+    """Intervals annotated with different rubric texts are not comparable. Rows record their
+    rubric (rubric_sha256 and rubric_version, since 0.1.3); warn when one dimension mixes them."""
+    key = next((column for column in ("rubric_sha256", "rubric_version") if column in frame.columns), None)
+    if key is None:
+        return
+    for dimension, group in frame.groupby("dimension"):
+        rubrics = {value for value in group[key] if not _is_missing(value)}
+        if len(rubrics) > 1:
+            versions = sorted({str(v) for v in group.get("rubric_version", []) if not _is_missing(v)})
+            which = f" (versions {', '.join(versions)})" if versions else ""
+            warnings.warn(f"{name}: the annotations for {dimension} come from {len(rubrics)} different "
+                          f"rubrics{which}. Intervals annotated with different rubrics are not "
+                          "comparable: fit them separately", DataWarning, stacklevel=3)
 
 
 def _melt_wide_annotations(frame, dims):

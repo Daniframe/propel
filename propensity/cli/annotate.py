@@ -162,15 +162,16 @@ def prompts_digest(requests):
 
 
 def prepare(settings, instances_path, dimension):
-    """The instances and the prompts, built the same way for every command."""
+    """The instances, the rubric and the prompts, built the same way for every command."""
     instances = load_instances(instances_path)
+    rubric = load_rubric(dimension, settings["rubrics_dir"], settings["rubric_version"])
     requests = build_requests(
         instances,
         propensity_name=settings["propensity_name"],
-        rubric=load_rubric(dimension, settings["rubrics_dir"], settings["rubric_version"]),
+        rubric=rubric,
         presentation=load_presentation(settings["rubrics_dir"]),
     )
-    return instances, requests
+    return instances, rubric, requests
 
 
 def progress_reporter(every=25):
@@ -191,7 +192,7 @@ def do_run(args):
         presentation=load_presentation(settings["rubrics_dir"]),
         mode="sequential", temperature=settings["temperature"], max_tokens=settings["max_tokens"],
         max_workers=settings["max_workers"], max_retries=settings["max_retries"],
-        on_progress=progress_reporter(),
+        on_progress=progress_reporter(), rubric_version=settings["rubric_version"],
     )
     write_table(rows, args.out)
     print(f"wrote {args.out}")
@@ -200,7 +201,7 @@ def do_run(args):
 
 def do_submit(args):
     settings = resolve(args)
-    _, requests = prepare(settings, args.instances, args.dimension)
+    _, _, requests = prepare(settings, args.instances, args.dimension)
     provider = build_provider(settings["provider"], settings["model"], settings["options"])
     batch_id = submit(provider, requests, temperature=settings["temperature"],
                       max_tokens=settings["max_tokens"])
@@ -261,7 +262,7 @@ def do_fetch(args):
     job = read_job(args.job)
     settings = {"rubrics_dir": job["rubrics_dir"], "rubric_version": job["rubric_version"],
                 "propensity_name": job["propensity_name"]}
-    instances, requests = prepare(settings, job["instances"], job["dimension"])
+    instances, rubric, requests = prepare(settings, job["instances"], job["dimension"])
     if prompts_digest(requests) != job["prompts_sha256"] and not args.force:
         print(f"error: the prompts no longer match the ones submitted as {job['batch_id']}, so "
               "the instances or the rubric changed since. Submit again, or pass --force to "
@@ -285,7 +286,8 @@ def do_fetch(args):
         print(f"warning: {warning.message}", file=sys.stderr)
 
     rows = rows_from_completions(instances, completions, dimension=job["dimension"],
-                                 annotator=f"{provider.name}:{provider.model}")
+                                 annotator=f"{provider.name}:{provider.model}", rubric=rubric,
+                                 rubric_version=job["rubric_version"])
     out = args.out or job["out"]
     write_table(rows, out)
     print(summarise(rows))

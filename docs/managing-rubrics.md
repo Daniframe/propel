@@ -88,8 +88,10 @@ sorted(load_dimensions())    # ['Af', 'Ag', 'Al', 'BR', 'Cm', 'Co', 'Ex', 'IM', 
    earlier annotations then needs the earlier release.
 
 Annotations are comparable only when made with the same rubric version, trait name and
-presentation block. Keep each version's annotation files apart: the `annotator` field records
-the model, not the rubric version.
+presentation block. Every row records its `rubric_version`, the SHA-256 of the rubric's text
+and the `propensity_version` that built the prompt, and `load_annotations` warns when one
+dimension's rows come from different rubrics. Keep each version's annotation files apart all
+the same.
 
 ## Updating a rubric
 

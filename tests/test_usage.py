@@ -38,8 +38,9 @@ def test_each_providers_usage_becomes_the_same_three_counts(usage, expected):
     assert tuple(normalise_usage(usage)[field] for field in USAGE_FIELDS) == expected
 
 
-def test_the_usage_fields_close_the_canonical_row():
-    assert ROW_FIELDS[-3:] == ("input_tokens", "output_tokens", "cached_input_tokens")
+def test_the_usage_fields_follow_parse_method_in_the_canonical_row():
+    start = ROW_FIELDS.index("parse_method") + 1
+    assert ROW_FIELDS[start:start + 3] == ("input_tokens", "output_tokens", "cached_input_tokens")
 
 
 def test_rows_carry_the_counts_even_for_failures():

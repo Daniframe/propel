@@ -59,7 +59,7 @@ could never be joined back.
 One row per instance, in input order, always, including instances that failed.
 
 ```jsonl
-{"question_id": "RA_0", "dimension": "RA", "lower": -1, "upper": 3, "annotator": "openai:gpt-4.1", "explanation": "Level 0: ...\n<FINAL_RANGE>[-1, +3]</FINAL_RANGE>", "parse_ok": true, "error": null, "parse_error": null, "parse_method": "final_range", "input_tokens": 2903, "output_tokens": 861, "cached_input_tokens": 2304, "source": "bench-1"}
+{"question_id": "RA_0", "dimension": "RA", "lower": -1, "upper": 3, "annotator": "openai:gpt-4.1", "explanation": "Level 0: ...\n<FINAL_RANGE>[-1, +3]</FINAL_RANGE>", "parse_ok": true, "error": null, "parse_error": null, "parse_method": "final_range", "input_tokens": 2903, "output_tokens": 861, "cached_input_tokens": 2304, "rubric_version": "v2", "rubric_sha256": "166969c2…", "propensity_version": "0.1.3", "source": "bench-1"}
 ```
 
 | Field | Type | Meaning |
@@ -76,6 +76,9 @@ One row per instance, in input order, always, including instances that failed.
 | `input_tokens` | int or null | prompt tokens the provider counted, cached ones included; null when it reported none |
 | `output_tokens` | int or null | tokens billed as output, reasoning included |
 | `cached_input_tokens` | int or null | the part of `input_tokens` served from the provider's prompt cache |
+| `rubric_version` | str or null | the rubric version used, e.g. `v2`; null for a rubric of your own whose version was not given |
+| `rubric_sha256` | str or null | SHA-256 of the rubric's exact text, so any rubric, packaged or not, is identifiable |
+| `propensity_version` | str | the PROPEL version that built the prompts; it fixes the prompt layout and the packaged presentation block |
 | other fields | any | copied from the instance |
 
 A row is in exactly one of three states:

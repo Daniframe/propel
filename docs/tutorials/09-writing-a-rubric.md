@@ -257,8 +257,8 @@ print(f"{same.mean():.0%} identical intervals; mean shift in lower bound "
 ```
 
 With the mock, both versions answer alike. With a real annotator, this shows how much the new
-wording moved the intervals. The `annotator` field does not record the rubric version, so keep
-each version's output in its own file.
+wording moved the intervals. Every row records its `rubric_version` and a hash of the rubric's
+text. Keep each version's output in its own file: loading one that mixes rubrics warns.
 
 ## 10. Into PROPEL
 
