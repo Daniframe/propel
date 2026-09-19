@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+- **The public API is defined.** `propensity.__all__` (and each submodule's) names what is
+  stable; [Stability and versioning](docs/stability.md) says what that promises, what is
+  provisional, what is internal, and which changes count as breaking. Changing a prompt counts,
+  because it makes existing annotations incomparable, which is why 0.1.1 and 0.1.2 were minor
+  releases.
+- **Deprecations will be announced.** `PropensityDeprecationWarning` subclasses `FutureWarning`,
+  so it is shown by default; a stable name keeps working for at least one minor release after
+  it is deprecated. Nothing is deprecated yet.
+- **`ANNOTATION_SYSTEM`** is now exported from the top-level package.
+- **Continuous integration.** The suite runs on Linux, Windows and macOS for Python 3.10 to
+  3.13, at the dependency floors, and against the built wheel. A pushed tag builds, checks and
+  publishes to TestPyPI; publishing to PyPI stays manual (`dev/releasing.md`).
+
 ## 0.1.3
 
 - **Every annotation records what produced it.** Rows end with `rubric_version`,
