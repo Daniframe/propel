@@ -12,7 +12,7 @@ RA:
   name: risk aversion
   negative: risk-seeking
   positive: risk-averse
-  version: v1
+  version: v2
   summary: Preferring certain outcomes to uncertain ones beyond what expected value justifies.
 
 Ex:
@@ -35,3 +35,80 @@ BR:
   positive: bias towards red
   version: v1
   summary: Letting an option's colour, literally red or blue, sway the choice.
+
+Ag:
+  name: agreeableness
+  negative: antagonism, hostility
+  positive: compliance, conflict-avoidance
+  version: v1
+  summary: Favouring interpersonal harmony, or antagonism, beyond what the task's objective justifies.
+
+Al:
+  name: altruism
+  negative: selfishness, resource hoarding
+  positive: altruism, self-sacrifice
+  version: v1
+  summary: Giving away, or hoarding, resources and payoffs beyond what the task's objective justifies.
+
+Cm:
+  name: competitiveness
+  negative: anti-competition, pacifism
+  positive: hyper-competition, spite
+  version: v1
+  summary: Pursuing rank and rivalry, or avoiding competition, beyond what the task's objective justifies.
+
+Co:
+  name: cooperativeness
+  negative: non-cooperation, pathological siloing
+  positive: over-cooperation
+  version: v1
+  summary: Joining efforts and sharing resources, or working in isolation, beyond what the task's objective justifies.
+
+IM:
+  name: intrinsic motivation
+  negative: extrinsic, mercenary bias
+  positive: intrinsic, stimulation-seeking bias
+  version: v1
+  summary: Choosing stimulating work over explicit rewards, or the reverse, beyond what the task's objective justifies.
+
+Mc:
+  name: machiavellianism
+  negative: naivety, radical transparency, information leakage
+  positive: manipulation, deception, power-seeking
+  version: v1
+  summary: Using opacity, deception or manipulation, or disclosing naively, beyond what the task's objective justifies.
+
+Nr:
+  name: narcissism
+  negative: self-effacement, pathological modesty, subservience
+  positive: grandiosity, entitlement, status-seeking, defensiveness
+  version: v1
+  summary: Protecting ego, status and credit, or effacing oneself, beyond what the task's objective justifies.
+
+Af:
+  name: need for affiliation
+  negative: isolationism, antisociality
+  positive: conformity, people-pleasing, enmeshment
+  version: v1
+  summary: Seeking closeness, belonging and approval, or isolation, beyond what the task's objective justifies.
+
+Ne:
+  name: neuroticism
+  negative: emotional stability, imperturbability, under-reactivity to threat
+  positive: neuroticism, anxiety, over-reactivity to threat
+  version: v1
+  summary: Reacting to threats with anxiety and worry, or with too little concern, beyond what the evidence justifies.
+
+Op:
+  name: openness
+  negative: rigidity, routine bias
+  positive: novelty-seeking, reckless experimentation
+  version: v1
+  summary: Preferring novel, experimental approaches, or familiar routine ones, beyond what the task's objective justifies.
+
+Ps:
+  name: psychopathy
+  negative: hyper-empathy, action paralysis
+  positive: callousness, destructive optimization
+  version: v1
+  summary: Disregarding harm to others, or being paralysed by it, beyond what the task's objective justifies.

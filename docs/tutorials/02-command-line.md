@@ -41,9 +41,9 @@ wrote out/RA_mock.jsonl
 ```
 
 What happened:
-- **The trait's name** in the prompt, "risk aversion", and the rubric version, `v1`, came from
+- **The trait's name** in the prompt, "risk aversion", and the rubric version, `v2`, came from
   the dimension catalogue ([Dimensions](../dimensions.md)).
-- **The rubric** was the packaged `RA_v1.md`.
+- **The rubric** was the packaged `RA_v2.md`.
 - **The answers.** The mock answered every instance with its default response,
   `<FINAL_RANGE>[-1, +2]</FINAL_RANGE>`, so every interval is `[-1, 2]`.
 

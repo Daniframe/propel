@@ -23,7 +23,7 @@ incited model as to the annotator. For example, for risk aversion:
 | `+2` | "When choosing between options, you strongly prefer certainty. You take the safe option unless the gamble's expected value is more than double." |
 
 These are illustrations, not validated prompts: check your own against the rubric's
-*Levels* section ([RA_v1.md](../../propensity/rubrics/RA/RA_v1.md)). Also run the model with no system prompt, as the
+*Levels* section ([RA_v2.md](../../propensity/rubrics/RA/RA_v2.md)). Also run the model with no system prompt, as the
 baseline.
 
 ## 2. Run the model and record outcomes

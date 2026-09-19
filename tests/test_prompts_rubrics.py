@@ -25,6 +25,8 @@ from propensity.annotation.rubrics import (
 from propensity.errors import ContractError
 PREAMBLE = ("The following is a rubric for determining the propensity of showing bias "
             "towards risk aversion:\n\n<rubric>\n")
+# Every dimension the package ships, sorted. TD is not written yet.
+SHIPPED = ["Af", "Ag", "Al", "BR", "Cm", "Co", "Ex", "IM", "Mc", "Ne", "Nr", "Op", "Ps", "RA", "Ul"]
 
 
 def test_the_prompt_is_the_four_pieces_with_the_question_on_its_own_line():
@@ -68,7 +70,8 @@ def test_the_name_of_the_trait_is_the_only_moving_part_of_the_preamble():
 
 def test_the_packaged_rubrics_are_the_default():
     assert RUBRICS_DIR == Path(propensity.__file__).resolve().parent / "rubrics"
-    assert load_rubric("RA") == load_rubric("RA", RUBRICS_DIR, "v1")
+    assert load_rubric("RA") == load_rubric("RA", RUBRICS_DIR, "v2")  # the catalogue's current version
+    assert available_versions("RA") == ["v1", "v2"]  # v1, the paper's, stays for reproduction
     assert load_presentation() == (RUBRICS_DIR / "presentation.md").read_text(encoding="utf-8")
 
 
@@ -83,17 +86,17 @@ def test_every_shipped_rubric_builds_a_prompt_that_ends_with_the_question():
 
 
 def test_the_shipped_rubrics_are_the_expected_set():
-    assert available_dimensions() == ["BR", "Ex", "RA", "Ul"]  # TD is not written yet
+    assert available_dimensions() == SHIPPED
 
 
 def test_rubric_paths_follow_the_convention():
     assert rubric_path_for("RA", "rubrics") == Path("rubrics/RA/RA_v1.md")
     assert rubric_path_for("RA", "rubrics", "v2") == Path("rubrics/RA/RA_v2.md")
-    assert rubric_path_for("RA") == RUBRICS_DIR / "RA" / "RA_v1.md"
+    assert rubric_path_for("RA") == RUBRICS_DIR / "RA" / "RA_v2.md"
 
 
 def test_a_missing_rubric_says_which_ones_exist():
-    with pytest.raises(ContractError, match="no rubric for dimension 'TD'.*BR, Ex, RA, Ul"):
+    with pytest.raises(ContractError, match=f"no rubric for dimension 'TD'.*{', '.join(SHIPPED)}"):
         load_rubric("TD")
 
 
@@ -139,15 +142,15 @@ def catalogue_dir(tmp_path, entries, versions=("v1",)):
 
 def test_the_packaged_catalogue_describes_every_dimension():
     catalogue = load_dimensions()
-    assert sorted(catalogue) == ["BR", "Ex", "RA", "Ul"]
+    assert sorted(catalogue) == SHIPPED
     assert catalogue["RA"] == Dimension(
         code="RA", name="risk aversion", negative="risk-seeking", positive="risk-averse",
-        version="v1", summary=catalogue["RA"].summary)
+        version="v2", summary=catalogue["RA"].summary)
     assert get_dimension("BR").name == "blue vs red colour preference"
 
 
 def test_an_unknown_dimension_names_the_known_ones():
-    with pytest.raises(ContractError, match="no dimension 'TD' in the catalogue.*known: BR, Ex, RA, Ul"):
+    with pytest.raises(ContractError, match=f"no dimension 'TD' in the catalogue.*known: {', '.join(SHIPPED)}"):
         get_dimension("TD")
 
 

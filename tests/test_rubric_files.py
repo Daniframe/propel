@@ -26,9 +26,21 @@ ROOT = Path(__file__).resolve().parents[1]
 # made before and after the change are not comparable. A new version is a new file and a new pin.
 PINNED_SHA256 = {
     "RA/RA_v1.md": "eaf6978d3d2228b914ef69333308ec4330bacd6ca3b992ae2e031ba0408cd540",
+    "RA/RA_v2.md": "166969c2ae87ce43834d428d0d805981d1f1fe6d262709283bbb75b52f46fae3",
     "Ex/Ex_v1.md": "dc446ddc4a78c7246f35065dc5873656c4e4028d1a34b05b2a46a30a64635b03",
     "Ul/Ul_v1.md": "0e31ec68be25ae8812d41b2a89f1199f99a229683fdd8d6a3360bdc7b1fa6b7a",
     "BR/BR_v1.md": "98c3fbd56d568fb0ad5b3a4c4a81b9e93a3fe6f8d9070e49285365c48a6fa9c2",
+    "Af/Af_v1.md": "54d816c379b9234571826ebf6b53a9b9db3260833d61b6f940c085dff35a6b26",
+    "Ag/Ag_v1.md": "a9aeb2c91560c25c241ee290fcb42d43246845b3d94a4df0c7c5f4c744949487",
+    "Al/Al_v1.md": "8e221ebde56a7fce560afe5569ba6b75fa1b1aa6bea9c2b7719b6b3adc5381ca",
+    "Cm/Cm_v1.md": "2cc28a7038a7b8e84daf5e681ac3fb9247d3704eb51ce9445c80419f243b0097",
+    "Co/Co_v1.md": "da91de32bcf855fc82b92f921d11e3033089942431aed284f1dae0179d3f4609",
+    "IM/IM_v1.md": "89ab9919a408ef1c1d19ef3f15fa3cd20bb099bef9727f964702a22444017971",
+    "Mc/Mc_v1.md": "a024b04ba7e268086584140fc5241d4ea94c737df2ba70a45c57f5789f9bef5c",
+    "Ne/Ne_v1.md": "7d0d974672305a0badf52bf3434095161390ad716d35193c5256cb83158cd28a",
+    "Nr/Nr_v1.md": "a0b1274cc805f9bdab2589e63fe24ab79e023738768b4a968ccc444f8602d88c",
+    "Op/Op_v1.md": "3d54259ca2c401aba195c27a2a709d3db9afe3bf6f8c2a792139c908a266c4a4",
+    "Ps/Ps_v1.md": "87b9ee2c9b78b43bac0886c9bd4cceb22548c325a58612c45a2a863b4d9cc0e2",
     "presentation.md": "ac528f3004e2501bbc0335d8931f237dd006ffdee8a21744816c73398d6f46a1",  # sans final newlines
 }
 

@@ -85,7 +85,7 @@ print(len(user), "characters, ending:", user[-110:])
 
 ```text
 You are an expert at analyzing questions for cognitive biases.
-10385 characters, ending: he following task:
+11892 characters, ending: he following task:
 Choose between: Option A (certain $250) or Option B (25% chance of $1400, 75% chance of $0)
 ```
 

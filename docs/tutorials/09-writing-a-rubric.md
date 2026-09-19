@@ -220,23 +220,23 @@ try a new version of a packaged rubric, copy it into your directory:
 
 ```python
 (rubrics / "RA").mkdir(exist_ok=True)
-shutil.copyfile(RUBRICS_DIR / "RA" / "RA_v1.md", rubrics / "RA" / "RA_v2.md")   # then edit RA_v2.md
+shutil.copyfile(RUBRICS_DIR / "RA" / "RA_v2.md", rubrics / "RA" / "RA_v3.md")   # then edit RA_v3.md
 
 from propensity.annotation import available_versions
-print(available_versions("RA", rubrics), check_rubric(load_rubric("RA", rubrics, "v2")))
+print(available_versions("RA", rubrics), check_rubric(load_rubric("RA", rubrics, "v3")))
 ```
 
 ```text
-['v2'] []
+['v3'] []
 ```
 
 Annotate with it (your catalogue has no `RA` entry, so the name is passed), and with the packaged
-`v1`:
+`v2`:
 
 ```bash
+propel-annotate run --instances examples/items_RA.jsonl --dimension RA --out out/RA_v3.jsonl \
+    --rubrics-dir out/rubrics --rubric-version v3 --propensity-name "risk aversion" --provider mock --model mock-1
 propel-annotate run --instances examples/items_RA.jsonl --dimension RA --out out/RA_v2.jsonl \
-    --rubrics-dir out/rubrics --rubric-version v2 --propensity-name "risk aversion" --provider mock --model mock-1
-propel-annotate run --instances examples/items_RA.jsonl --dimension RA --out out/RA_v1.jsonl \
     --provider mock --model mock-1
 ```
 
@@ -245,11 +245,11 @@ Then compare the versions' intervals on the same instances:
 ```python
 from propensity import load_annotations
 
-old, new = load_annotations("out/RA_v1.jsonl"), load_annotations("out/RA_v2.jsonl")
-pairs = old.merge(new, on=["question_id", "dimension"], suffixes=("_v1", "_v2"))
-same = (pairs["lower_v1"] == pairs["lower_v2"]) & (pairs["upper_v1"] == pairs["upper_v2"])
+old, new = load_annotations("out/RA_v2.jsonl"), load_annotations("out/RA_v3.jsonl")
+pairs = old.merge(new, on=["question_id", "dimension"], suffixes=("_v2", "_v3"))
+same = (pairs["lower_v2"] == pairs["lower_v3"]) & (pairs["upper_v2"] == pairs["upper_v3"])
 print(f"{same.mean():.0%} identical intervals; mean shift in lower bound "
-      f"{(pairs['lower_v2'] - pairs['lower_v1']).mean():+.2f}, upper {(pairs['upper_v2'] - pairs['upper_v1']).mean():+.2f}")
+      f"{(pairs['lower_v3'] - pairs['lower_v2']).mean():+.2f}, upper {(pairs['upper_v3'] - pairs['upper_v2']).mean():+.2f}")
 ```
 
 ```text

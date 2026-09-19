@@ -45,7 +45,7 @@ RA:
   name: risk aversion
   negative: risk-seeking
   positive: risk-averse
-  version: v1
+  version: v2
   summary: Preferring certain outcomes to uncertain ones beyond what expected value justifies.
 ```
 
@@ -71,8 +71,8 @@ In Python:
 ```python
 from propensity import get_dimension, load_dimensions
 
-get_dimension("RA")          # Dimension(code='RA', name='risk aversion', ..., version='v1', ...)
-sorted(load_dimensions())    # ['BR', 'Ex', 'RA', 'Ul']
+get_dimension("RA")          # Dimension(code='RA', name='risk aversion', ..., version='v2', ...)
+sorted(load_dimensions())    # ['Af', 'Ag', 'Al', 'BR', 'Cm', 'Co', 'Ex', 'IM', ...]
 ```
 
 ## Three rules
@@ -93,12 +93,12 @@ the model, not the rubric version.
 
 ## Updating a rubric
 
-Suppose `RA` is at `v1` and needs better worked examples.
+Suppose `RA` is at `v2` and needs better worked examples.
 
 **1. Copy the current version to the next one**, and edit only the copy:
 
 ```bash
-cp propensity/rubrics/RA/RA_v1.md propensity/rubrics/RA/RA_v2.md
+cp propensity/rubrics/RA/RA_v2.md propensity/rubrics/RA/RA_v3.md
 ```
 
 **2. Check its structure.** A new version should pass every recommended check, including any its
@@ -107,14 +107,14 @@ predecessor missed:
 ```python
 from propensity.annotation import check_rubric, load_rubric
 
-print(check_rubric(load_rubric("RA", version="v2")))    # [] when it passes every recommended check
+print(check_rubric(load_rubric("RA", version="v3")))    # [] when it passes every recommended check
 ```
 
 **3. Pilot it.** Annotate a sample of 20 instances with the new version, and read every
 explanation ([Tutorial 3](tutorials/03-annotating-with-a-provider.md#3-read-every-explanation)):
 
 ```bash
-propel-annotate run --instances pilot_RA.jsonl --dimension RA --rubric-version v2 --out RA_v2_pilot.jsonl \
+propel-annotate run --instances pilot_RA.jsonl --dimension RA --rubric-version v3 --out RA_v3_pilot.jsonl \
     --provider anthropic --model claude-haiku-4-5
 ```
 
@@ -131,14 +131,14 @@ extra, not a requirement.
 ```yaml
 RA:
   ...
-  version: v2
+  version: v3
 ```
 
 **6. Pin its bytes** in `tests/test_rubric_files.py`. Add the file's SHA-256 to
 `PINNED_SHA256`:
 
 ```bash
-python -c "import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], 'rb').read()).hexdigest())" propensity/rubrics/RA/RA_v2.md
+python -c "import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], 'rb').read()).hexdigest())" propensity/rubrics/RA/RA_v3.md
 ```
 
 **7. Regenerate the catalogue page**, then run the tests:
@@ -148,11 +148,11 @@ python docs/make_dimensions.py
 pytest -q
 ```
 
-**8. Record it** in the release notes: what changed, why, and that annotations made with `v1`
-stay valid for `v1` but are not comparable with `v2`.
+**8. Record it** in the release notes: what changed, why, and that annotations made with `v2`
+stay valid for `v2` but are not comparable with `v3`.
 
-Keep `RA_v1.md`: it is how anyone reproduces annotations made with it
-(`--rubric-version v1`).
+Keep `RA_v2.md`: it is how anyone reproduces annotations made with it
+(`--rubric-version v2`).
 
 ## Adding a dimension
 
@@ -165,7 +165,7 @@ Suppose the new dimension is delay of gratification, with code `TD`.
 - **the poles:** what `-3` and `+3` mean, with `0` the unbiased, instrumentally rational agent.
 
 **2. Write the rubric** as `propensity/rubrics/TD/TD_v1.md`, starting from the template below.
-Model it on a complete rubric such as `RA_v1.md`.
+Model it on a complete rubric such as `RA_v2.md`.
 
 **3. Add it to the catalogue:**
 

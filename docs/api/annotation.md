@@ -48,8 +48,8 @@ check_rubric(text) -> list[str]
 ```python
 from propensity.annotation import available_dimensions, available_versions, check_rubric, load_rubric
 
-available_dimensions()                  # ['BR', 'Ex', 'RA', 'Ul']
-available_versions("RA")                # ['v1']
+available_dimensions()                  # ['Af', 'Ag', 'Al', 'BR', 'Cm', 'Co', 'Ex', 'IM', ...]
+available_versions("RA")                # ['v1', 'v2']
 rubric = load_rubric("RA")              # the current version
 check_rubric(rubric)                    # []
 ```
