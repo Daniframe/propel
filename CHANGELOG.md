@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- **Python 3.14 is supported and tested.** The suite runs on 3.10 to 3.14 in CI, on Linux,
+  Windows and macOS. 3.10 remains supported.
+
 ## 0.2.0
 
 - **The public API is defined.** `propensity.__all__` (and each submodule's) names what is
