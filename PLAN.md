@@ -634,6 +634,24 @@ At the user's request, with about 25 dimensions planned for the release:
 
 **Tests:** 507, green with warnings as errors. With minimal dependencies, 453 pass and 54 skip.
 
+## Releases after 0.1.0
+
+Committed locally, never pushed, tagged or uploaded: some rubrics are not cleared for
+publication. Decisions and their reasons: [dev/decisions-2026-09-19.md](dev/decisions-2026-09-19.md).
+
+| Version | Brings |
+|---|---|
+| 0.1.1 | the question on its own line after the presentation block; rubric checks become recommendations, flagged when a rubric annotates; the incitement check presented as an optional extra |
+| 0.1.2 | eleven new dimensions and risk aversion v2 as RA's default (15 in all); `.env` read from the working directory; token usage recorded on every row |
+| 0.1.3 | `rubric_version`, `rubric_sha256` and `propensity_version` on every row, and a warning when one dimension's annotations mix rubrics |
+| 0.2.0 | the public API defined (`__all__`, [stability](docs/stability.md), deprecation policy); CI and release workflows |
+| 0.3.0 | Python 3.14 supported and tested |
+
+**Still open:** no adapter has completed a real annotation call (see
+[dev/provider-free-tiers.md](dev/provider-free-tiers.md) for the cheapest way to change that);
+`Co`, `IM` and `Op` lack a `[0, 0]` full example; the new dimensions' catalogue summaries are
+drafts awaiting review.
+
 ## Verification
 
 - **Tests:** `C:\Users\Daniel\.venvs\propel\Scripts\python.exe -m pytest -q -W error` after every
