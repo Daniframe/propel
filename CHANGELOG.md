@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.2
+
+- **Eleven new dimensions,** each with a `v1` rubric: agreeableness (`Ag`), altruism (`Al`),
+  competitiveness (`Cm`), cooperativeness (`Co`), intrinsic motivation (`IM`), machiavellianism
+  (`Mc`), narcissism (`Nr`), need for affiliation (`Af`), neuroticism (`Ne`), openness (`Op`)
+  and psychopathy (`Ps`). The package now ships 15 dimensions.
+- **Risk aversion `v2`, now `RA`'s default.** It belongs to the same set as the new dimensions.
+  `RA_v1`, the rubric behind the paper's annotations, stays in the package: request it with
+  `--rubric-version v1` (or `version="v1"`) to annotate with it. Annotations made with `v1` and
+  `v2` are not comparable.
+- **Notation.** The new rubrics' wording is unchanged. Their notation was brought into line
+  with the output contract and the recommended checks: ASCII minus signs, ranges bounded at ±3
+  instead of ±∞, "50%", saturating ±3 level headings, and titles without codes. Where a rubric's
+  Level 0 section had a `[0, 0]` example, it was also added to the full examples. `Co`, `IM` and
+  `Op` have none yet, so they do not pass all recommended checks.
+- **Fixed: `.env` is found.** `propel-annotate` looks for `.env` in the working directory, then
+  in each folder above it. An installed package used to look only next to its own files, and
+  never found yours. Variables already set in the environment still win.
+- **Fixed: token usage is recorded.** Every annotation row now has `input_tokens`,
+  `output_tokens` and `cached_input_tokens`, from whatever the provider reports, and a run ends
+  with their totals. They join the canonical row fields, after `parse_method`.
+
 ## 0.1.1
 
 - **The task starts on its own line.** The prompt now puts exactly one line break between
