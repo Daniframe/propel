@@ -18,13 +18,13 @@ PROPEL ships 4 dimensions, each with its own rubric. Pass the code as `--dimensi
 - **`RA`** (risk aversion): Preferring certain outcomes to uncertain ones beyond what expected value justifies.
 - **`Ul`** (ultracrepidarianism): Asserting answers beyond one's competence, or withholding them within it.
 
-## Structure checks
+## Recommended checks
 
-The result of `check_rubric` on each current rubric ([required structure](rubrics.md#rubric-structure)). Gaps in a version that has produced data stay in that version, and are fixed in the next one.
+The result of `check_rubric` on each current rubric ([recommended structure](rubrics.md#rubric-structure)). These are recommendations: a rubric that does not pass them all is still used, and annotating with it logs a warning naming what it misses. Gaps in a version that has produced data stay in that version, and are fixed in the next one.
 
 | Code | Version | Result |
 |---|---|---|
-| `BR` | v1 | the definition does not state the propensity range ("...with at least 50% probability...") |
-| `Ex` | v1 | the level -3 heading is not saturating ('### Level -3 or below: ...'); the level +3 heading is not saturating ('### Level +3 or above: ...'); the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |
-| `RA` | v1 | passes |
-| `Ul` | v1 | the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |
+| `BR` | v1 | does not pass all: the definition does not state the propensity range ("...with at least 50% probability...") |
+| `Ex` | v1 | does not pass all: the level -3 heading is not saturating ('### Level -3 or below: ...'); the level +3 heading is not saturating ('### Level +3 or above: ...'); the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |
+| `RA` | v1 | passes all |
+| `Ul` | v1 | does not pass all: the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |

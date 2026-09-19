@@ -4,7 +4,7 @@ Write a rubric in a directory of your own, check it, try it, and version it, all
 touching the rubrics that ship with PROPEL. The rubric decides every interval ever fitted
 against it, so it deserves the most care of anything in the project.
 
-- **Required structure:** [Rubrics and prompts](../rubrics.md#rubric-structure).
+- **Recommended structure:** [Rubrics and prompts](../rubrics.md#rubric-structure).
 - **Moving a finished rubric into PROPEL:** [Managing rubrics](../managing-rubrics.md#adding-a-dimension).
 
 **You need:** PROPEL, run where `python -m propensity.examples` has put the example data in
@@ -27,8 +27,8 @@ shutil.copyfile(RUBRICS_DIR / "presentation.md", rubrics / "presentation.md")
 
 ## 2. Write the rubric
 
-The example below, for delay of gratification (`TD`), is shortened. It shows the structure
-every rubric needs, not a finished rubric:
+The example below, for delay of gratification (`TD`), is shortened. It shows the recommended
+structure, not a finished rubric:
 - a title;
 - a definition with both poles and the propensity-range sentence;
 - seven levels, with `-3` and `+3` saturating;
@@ -79,7 +79,7 @@ Always waits, whatever the immediate reward is worth.
 
 ## 3. Check its structure
 
-`check_rubric` lists every way a rubric departs from the required structure:
+`check_rubric` lists every recommended check a rubric does not pass:
 
 ```python
 from propensity.annotation import check_rubric, load_rubric
@@ -93,7 +93,9 @@ print(check_rubric(rubric.replace("### Level +3 or above", "### Level +3")))
 ["the level +3 heading is not saturating ('### Level +3 or above: ...')"]
 ```
 
-A rubric that goes into PROPEL must return `[]`: the test suite checks every packaged rubric.
+Aim for `[]`, above all for a rubric that goes into PROPEL. A rubric that misses some checks
+still works: annotating with it logs a warning naming what it misses, and
+[Dimensions](../dimensions.md#recommended-checks) lists every packaged rubric's result.
 
 ## 4. Give it a catalogue entry
 

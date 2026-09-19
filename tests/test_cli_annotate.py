@@ -165,6 +165,13 @@ def test_credentials_never_reach_the_job_file(workspace, stub_provider):
     assert "sk-secret" not in json.dumps(job)
 
 
+def test_a_rubric_that_misses_recommended_checks_is_flagged_but_used(workspace, caplog):
+    with caplog.at_level("WARNING"):
+        assert main(argv(workspace, "run")) == 0  # the workspace's rubric is a bare title
+    assert "the risk aversion rubric does not pass all recommended checks" in caplog.text
+    assert read_table(workspace / "annotations.jsonl")["parse_ok"].all()
+
+
 def test_a_dimension_with_no_name_in_words_is_refused(workspace, capsys):
     code = main(["run", "--instances", str(workspace / "items.jsonl"), "--dimension", "Ex",
                  "--out", str(workspace / "x.jsonl"),

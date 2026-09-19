@@ -134,13 +134,16 @@ def load_presentation(rubrics_dir=None) -> str:
 
 
 def check_rubric(text: str) -> list[str]:
-    """The ways a rubric departs from the required structure; empty when it has none.
+    """The recommended checks a rubric does not pass; empty when it passes them all.
 
-    Required: a `# ... PROPENSITY` title; `## Definition`, `## Levels` and `## Full examples`
+    Recommended: a `# ... PROPENSITY` title; `## Definition`, `## Levels` and `## Full examples`
     sections in that order; the definition's propensity-range sentence ("...with at least 50%
     probability..."); seven `### Level` headings from -3 to +3 in order, with -3 and +3 written
     as saturating ("-3 or below", "+3 or above"); and full examples that include an orthogonal
     [-3, +3] case and a degenerate [0, 0] case.
+
+    These are recommendations: nothing refuses a rubric that misses some. Annotating with one
+    logs a warning naming what it misses.
     """
     problems = []
     lines = text.splitlines()

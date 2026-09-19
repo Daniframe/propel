@@ -4,6 +4,7 @@ identical prompts and write identical rows."""
 import pytest
 
 from propensity.annotation.prompts import build_annotation_prompt
+from propensity.annotation.rubrics import load_rubric
 from propensity.annotation.runner import (
     annotate,
     build_requests,
@@ -113,6 +114,21 @@ def test_auto_takes_the_batch_api_when_there_is_one():
     provider = MockBatchProvider()
     run(provider, "auto")
     assert len(provider.batches) == 1
+
+
+def test_a_rubric_that_misses_recommended_checks_is_flagged_and_still_used(caplog):
+    with caplog.at_level("WARNING"):
+        rows = run(MockProvider(response=script()), "sequential", max_workers=1)
+    assert "the risk aversion rubric does not pass all recommended checks" in caplog.text
+    assert "no '## Definition' section" in caplog.text  # it names what the rubric misses
+    assert all(row["parse_ok"] for row in rows)          # and annotates with it all the same
+
+
+def test_a_rubric_that_passes_every_recommended_check_is_not_flagged(caplog):
+    with caplog.at_level("WARNING"):
+        build_requests(instances(2), propensity_name=NAME, rubric=load_rubric("RA"),
+                       presentation=PRESENTATION)
+    assert "recommended checks" not in caplog.text
 
 
 def test_auto_falls_back_to_sequential_and_says_so(caplog):

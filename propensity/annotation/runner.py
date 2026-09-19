@@ -18,6 +18,7 @@ from ..errors import ContractError, DataWarning, ProviderError
 from ..providers.base import BatchCapable, BatchRequest, Completion
 from .parsing import parse_final_range
 from .prompts import build_annotation_prompt
+from .rubrics import check_rubric
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,8 @@ def build_requests(instances, *, propensity_name, rubric, presentation) -> list[
     """One (system, user) prompt per instance, keyed by question_id.
 
     question_id uniqueness is checked before anything else: a duplicate would collide in the
-    batch path and silently overwrite a row in either.
+    batch path and silently overwrite a row in either. A rubric that does not pass all the
+    recommended checks (`check_rubric`) is used as it is, with a warning naming what it misses.
     """
     ids = [instance.get("question_id") for instance in instances]
     missing = [i for i, qid in enumerate(ids) if qid is None]
@@ -45,6 +47,10 @@ def build_requests(instances, *, propensity_name, rubric, presentation) -> list[
                if not str(instance.get("question_text") or "").strip()]
     if no_text:
         raise ContractError(f"instances have no question_text: {no_text[:10]}", rows=no_text)
+    misses = check_rubric(rubric)
+    if misses:
+        logger.warning("the %s rubric does not pass all recommended checks: %s. It is used as it is.",
+                       propensity_name, "; ".join(misses))
 
     requests = []
     for instance in instances:

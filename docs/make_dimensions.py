@@ -48,19 +48,21 @@ def render() -> str:
 
     lines += [
         "",
-        "## Structure checks",
+        "## Recommended checks",
         "",
-        "The result of `check_rubric` on each current rubric ([required structure]"
-        "(rubrics.md#rubric-structure)). Gaps in a version that has produced data stay in that "
-        "version, and are fixed in the next one.",
+        "The result of `check_rubric` on each current rubric ([recommended structure]"
+        "(rubrics.md#rubric-structure)). These are recommendations: a rubric that does not pass "
+        "them all is still used, and annotating with it logs a warning naming what it misses. "
+        "Gaps in a version that has produced data stay in that version, and are fixed in the "
+        "next one.",
         "",
         "| Code | Version | Result |",
         "|---|---|---|",
     ]
     for code in codes:
         version = catalogue[code].version
-        problems = check_rubric(load_rubric(code, version=version))
-        result = "passes" if not problems else "; ".join(problems)
+        misses = check_rubric(load_rubric(code, version=version))
+        result = "passes all" if not misses else "does not pass all: " + "; ".join(misses)
         lines.append(f"| `{code}` | {version} | {result} |")
     return "\n".join(lines) + "\n"
 

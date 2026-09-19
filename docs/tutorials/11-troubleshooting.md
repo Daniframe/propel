@@ -29,6 +29,7 @@ exceptions.
 | `no name in words for dimension 'TD': it is not in the dimension catalogue; pass --propensity-name, …` | a code the catalogue does not list, so it has no trait name for the prompt | check the code against [Dimensions](../dimensions.md); for a rubric of your own, pass `--propensity-name "…"` or add a `dimensions.yaml` |
 | `…/XX/XX_v1.md: no rubric for dimension 'XX'; rubrics found for: BR, Ex, RA, Ul` | a misspelt code, or a rubrics directory without it | check `--dimension`, and `--rubrics-dir` if you pass one |
 | `…/RA/RA_v9.md: no rubric version 'v9' for dimension 'RA'; versions found: v1, v2` | a version that does not exist | pick one of those listed, or drop `--rubric-version` to use the current one |
+| `WARNING the … rubric does not pass all recommended checks: …. It is used as it is.` | the rubric misses a recommended element, e.g. a `[0, 0]` full example ([Rubric structure](../rubrics.md#rubric-structure)) | nothing, to go ahead: the run continues. For a rubric of your own, add what the message names |
 | `…/dimensions.yaml: entry 'TD' has missing field(s) ['version']` (or `unknown field(s)`) | a malformed catalogue entry | fix the entry ([format](../managing-rubrics.md#the-catalogue)) |
 | `…: not valid UTF-8 (…)` | a rubric saved in another encoding | re-save the file as UTF-8 |
 | `unknown provider 'x'; available: anthropic, azure, google, http, mock, openai` | misspelt provider | use one of the names listed |

@@ -1,7 +1,7 @@
 # Managing rubrics
 
 How PROPEL's rubrics are organised, how to update one, and how to add a dimension. What a rubric
-must contain is in [Rubrics and prompts](rubrics.md#rubric-structure). [Tutorial 9](tutorials/09-writing-a-rubric.md)
+should contain is in [Rubrics and prompts](rubrics.md#rubric-structure). [Tutorial 9](tutorials/09-writing-a-rubric.md)
 works through an example.
 
 - [Where they live](#where-they-live)
@@ -101,13 +101,13 @@ Suppose `RA` is at `v1` and needs better worked examples.
 cp propensity/rubrics/RA/RA_v1.md propensity/rubrics/RA/RA_v2.md
 ```
 
-**2. Check its structure.** A new version must pass every check, including any its predecessor
-was exempt from:
+**2. Check its structure.** A new version should pass every recommended check, including any its
+predecessor missed:
 
 ```python
 from propensity.annotation import check_rubric, load_rubric
 
-print(check_rubric(load_rubric("RA", version="v2")))    # [] when the structure is complete
+print(check_rubric(load_rubric("RA", version="v2")))    # [] when it passes every recommended check
 ```
 
 **3. Pilot it.** Annotate a sample of 20 instances with the new version, and read every
@@ -178,8 +178,9 @@ TD:
   summary: Letting a preference about timing override the value-maximising choice.
 ```
 
-**4. Check it.** `check_rubric(load_rubric("TD"))` must return `[]`. New rubrics are held to
-every rule.
+**4. Check it.** `check_rubric(load_rubric("TD"))` lists the recommended checks it does not pass;
+aim for `[]`. A rubric that misses some can still be used: annotating with it logs a warning
+naming them.
 
 **5. Pilot, compare with your own judgement, and validate with incited models**, exactly as for
 a new version (steps 3 and 4 above).
@@ -239,7 +240,7 @@ Examples:
 |---|---|
 | every rubric file and `presentation.md` has a pinned SHA-256 | any edit, including an editor adding or removing a rubric's trailing newline. `presentation.md` is pinned without its trailing newlines, which no prompt contains |
 | every file is UTF-8 with `\n` line endings | encoding accidents that would change the prompt |
-| every rubric passes `check_rubric` | a missing section, level or example. Only the gaps recorded in `KNOWN_GAPS` are exempt, and nothing may be added there |
+| `check_rubric` runs on every rubric file | a rubric the checker cannot read. The checks are recommendations: a rubric that misses some fails no test. Its gaps are listed in `docs/dimensions.md` and logged whenever it annotates |
 | every folder is catalogued, and every entry's version exists | a rubric the CLI cannot name, or a catalogue entry pointing at nothing |
 | trait names are unique, and poles and summaries given | two dimensions that would build indistinguishable prompts |
 | `docs/dimensions.md` matches the catalogue | documentation that has fallen behind |

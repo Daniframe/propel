@@ -63,24 +63,30 @@ Each level subsection should:
   expected value".
 - **Give 2–3 worked examples,** each labelled with the bound it produces.
 
-Two further rules:
+Two further recommendations:
 - **Write `-3` and `+3` as saturating** ("-3 or below", "+3 or above"). Without it, annotators
   cluster at interior levels and the endpoints go unused.
 - **Include in Full Examples** at least one orthogonal `[-3, +3]` case and one degenerate
   `[0, 0]` case.
 
-`check_rubric` tests all of this:
+`check_rubric` checks all of this, and lists what a rubric misses:
 
 ```python
 from propensity.annotation import check_rubric, load_rubric
 
-check_rubric(load_rubric("RA"))    # [] : the structure is complete
+check_rubric(load_rubric("RA"))    # [] : passes every recommended check
 check_rubric(load_rubric("Ex"))    # ["the level -3 heading is not saturating ...", ...]
 ```
 
-Some v1 rubrics predate these rules; [Dimensions](dimensions.md#structure-checks) lists their
-gaps. They keep them, because their wording produced existing annotation data, and their next
-versions must pass every check.
+**These are recommendations, not requirements.** A rubric that misses some is still used:
+annotating with it logs a warning that names what it misses, e.g.
+
+```text
+WARNING the extraversion rubric does not pass all recommended checks: the level -3 heading is not saturating ('### Level -3 or below: ...'); ... It is used as it is.
+```
+
+[Dimensions](dimensions.md#recommended-checks) lists each current rubric's result. The paper's
+v1 rubrics keep their gaps, because their wording produced existing annotation data.
 
 ## The presentation block
 

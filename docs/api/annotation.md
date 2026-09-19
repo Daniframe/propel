@@ -38,7 +38,7 @@ check_rubric(text) -> list[str]
 | `rubric_path_for` | the path `load_rubric` reads |
 | `available_dimensions` | sorted codes with at least one rubric file, or with a rubric of `version` when given |
 | `available_versions` | one dimension's versions on disk, oldest first (`v2` before `v10`) |
-| `check_rubric` | the ways a rubric's text departs from the [required structure](../rubrics.md#rubric-structure); `[]` when there are none |
+| `check_rubric` | the [recommended checks](../rubrics.md#rubric-structure) a rubric's text does not pass; `[]` when it passes them all. Advisory: nothing refuses a rubric that misses some |
 
 **Raises** `ContractError` when:
 - the dimension has no rubric (the message lists the dimensions that exist);
@@ -228,7 +228,8 @@ fetching in another.
 build_requests(instances, *, propensity_name, rubric, presentation) -> list[BatchRequest]
 ```
 One `BatchRequest(custom_id=question_id, system, user)` per instance. Validates ids and texts
-exactly as `annotate` does.
+exactly as `annotate` does. A rubric that does not pass all the recommended checks is used as it
+is, with a logged warning naming what it misses.
 
 ```python
 run_sequential(provider, requests, *, temperature=0.0, max_tokens=None, max_workers=8,
