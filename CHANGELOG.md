@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.1
+
+- **The task starts on its own line.** The prompt now puts exactly one line break between
+  "Annotate the following task:" and the instance, however `presentation.md` ends. This changes
+  every prompt of every dimension: annotations made with 0.1.0 are not comparable with new
+  ones, and reproducing them needs 0.1.0.
+- **Rubric checks are recommendations.** A rubric that does not pass all of `check_rubric`'s
+  checks is still used. Annotating with it logs a warning naming what it misses, and
+  [Dimensions](docs/dimensions.md#recommended-checks) lists each current rubric's result. The
+  test suite no longer fails on a rubric's gaps.
+- **The incitement check is optional.** Recovering incited levels ([Tutorial 7](docs/tutorials/07-validating-with-incitement.md))
+  is presented as an end-to-end check worth trying, not a step PROPEL requires.
+
 ## 0.1.0
 
 First release.
