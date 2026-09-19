@@ -29,6 +29,7 @@ from ..annotation import (
     rows_from_completions,
     submit,
     summarise,
+    summarise_usage,
     wait_for_batch,
 )
 from ..annotation.rubrics import DEFAULT_VERSION
@@ -288,6 +289,9 @@ def do_fetch(args):
     out = args.out or job["out"]
     write_table(rows, out)
     print(summarise(rows))
+    usage = summarise_usage(rows)
+    if usage:
+        print(usage)
     print(f"wrote {out}")
     return 0
 

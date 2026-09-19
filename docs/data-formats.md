@@ -59,7 +59,7 @@ could never be joined back.
 One row per instance, in input order, always, including instances that failed.
 
 ```jsonl
-{"question_id": "RA_0", "dimension": "RA", "lower": -1, "upper": 3, "annotator": "openai:gpt-4.1", "explanation": "Level 0: ...\n<FINAL_RANGE>[-1, +3]</FINAL_RANGE>", "parse_ok": true, "error": null, "parse_error": null, "parse_method": "final_range", "source": "bench-1"}
+{"question_id": "RA_0", "dimension": "RA", "lower": -1, "upper": 3, "annotator": "openai:gpt-4.1", "explanation": "Level 0: ...\n<FINAL_RANGE>[-1, +3]</FINAL_RANGE>", "parse_ok": true, "error": null, "parse_error": null, "parse_method": "final_range", "input_tokens": 2903, "output_tokens": 861, "cached_input_tokens": 2304, "source": "bench-1"}
 ```
 
 | Field | Type | Meaning |
@@ -73,6 +73,9 @@ One row per instance, in input order, always, including instances that failed.
 | `error` | str or null | the provider error, when the call itself failed |
 | `parse_error` | str or null | why no valid interval was read |
 | `parse_method` | str or null | `final_range`, `legacy_phrase` or `legacy_bracket` ([parsing](rubrics.md#parsing)) |
+| `input_tokens` | int or null | prompt tokens the provider counted, cached ones included; null when it reported none |
+| `output_tokens` | int or null | tokens billed as output, reasoning included |
+| `cached_input_tokens` | int or null | the part of `input_tokens` served from the provider's prompt cache |
 | other fields | any | copied from the instance |
 
 A row is in exactly one of three states:

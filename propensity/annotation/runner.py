@@ -22,9 +22,11 @@ from .rubrics import check_rubric
 
 logger = logging.getLogger(__name__)
 
+# Token counts, as normalise_usage reports them; None when the provider gave none.
+USAGE_FIELDS = ("input_tokens", "output_tokens", "cached_input_tokens")
 # The canonical fields of an annotation row, in order; the instance's other fields follow them.
 ROW_FIELDS = ("question_id", "dimension", "lower", "upper", "annotator", "explanation",
-              "parse_ok", "error", "parse_error", "parse_method")
+              "parse_ok", "error", "parse_error", "parse_method", *USAGE_FIELDS)
 DONE_STATES = ("completed", "failed", "cancelled")
 MODES = ("auto", "batch", "sequential")
 
@@ -159,6 +161,8 @@ def rows_from_completions(instances, completions, *, dimension, annotator) -> li
             parsed = parse_final_range(completion.text)
             row.update(explanation=completion.text, parse_ok=parsed.parse_ok, lower=parsed.lower,
                        upper=parsed.upper, parse_error=parsed.error, parse_method=parsed.method)
+        if completion is not None:
+            row.update(normalise_usage(completion.usage))
 
         for key, value in instance.items():  # every other field of the instance passes through
             row.setdefault(key, value)
@@ -173,6 +177,51 @@ def summarise(rows) -> str:
     parse_failed = len(rows) - ok - provider_error
     return (f"{ok} ok, {parse_failed} parse-failed, {provider_error} provider-error "
             f"out of {len(rows)} total")
+
+
+def normalise_usage(usage) -> dict:
+    """A provider's token counts as the row's three usage fields, all None when it gave none.
+
+    input_tokens counts every prompt token, cached ones included; cached_input_tokens is the
+    part served from the provider's prompt cache; output_tokens counts every token billed as
+    output, reasoning included. Understands OpenAI's (chat completions and responses),
+    Anthropic's and Gemini's shapes.
+    """
+    counts = dict.fromkeys(USAGE_FIELDS)
+    if not isinstance(usage, dict):
+        return counts
+
+    def number(key, source=usage):
+        value = (source or {}).get(key)
+        return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+    if "prompt_tokens" in usage or "completion_tokens" in usage:        # OpenAI chat completions
+        counts.update(input_tokens=number("prompt_tokens"), output_tokens=number("completion_tokens"),
+                      cached_input_tokens=number("cached_tokens", usage.get("prompt_tokens_details")))
+    elif "prompt_token_count" in usage or "candidates_token_count" in usage:  # Gemini
+        output, thoughts = number("candidates_token_count"), number("thoughts_token_count")
+        counts.update(input_tokens=number("prompt_token_count"),
+                      output_tokens=None if output is None and thoughts is None else (output or 0) + (thoughts or 0),
+                      cached_input_tokens=number("cached_content_token_count"))
+    elif "input_tokens_details" in usage:                               # OpenAI responses
+        counts.update(input_tokens=number("input_tokens"), output_tokens=number("output_tokens"),
+                      cached_input_tokens=number("cached_tokens", usage.get("input_tokens_details")))
+    elif "input_tokens" in usage or "output_tokens" in usage:           # Anthropic
+        fresh, read = number("input_tokens"), number("cache_read_input_tokens")
+        written = number("cache_creation_input_tokens")                 # not in input_tokens
+        counts.update(input_tokens=None if fresh is None else fresh + (read or 0) + (written or 0),
+                      output_tokens=number("output_tokens"), cached_input_tokens=read)
+    return counts
+
+
+def summarise_usage(rows) -> str | None:
+    """Total token counts over the rows that report them; None when none does."""
+    reported = [row for row in rows if row.get("input_tokens") is not None or row.get("output_tokens") is not None]
+    if not reported:
+        return None
+    total = {field: sum(row.get(field) or 0 for row in reported) for field in USAGE_FIELDS}
+    return (f"tokens: {total['input_tokens']:,} input ({total['cached_input_tokens']:,} cached), "
+            f"{total['output_tokens']:,} output, over {len(reported)} of {len(rows)} rows")
 
 
 def annotate(instances, *, provider, dimension, propensity_name, rubric, presentation,
@@ -220,4 +269,7 @@ def annotate(instances, *, provider, dimension, propensity_name, rubric, present
 
     rows = rows_from_completions(instances, completions, dimension=dimension, annotator=annotator)
     print(summarise(rows))
+    usage = summarise_usage(rows)
+    if usage:
+        print(usage)
     return rows

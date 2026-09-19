@@ -119,6 +119,18 @@ Add the output: the level-by-level reasoning is typically 500 to 3,000 tokens pe
 Multiply by the number of dimensions. A batch ([Tutorial 4](04-batch-annotation.md)) costs
 about half as much.
 
+After a pilot, measure instead of estimating. Every row records the tokens the provider
+billed, and the run ends with their totals:
+
+<!-- no-run -->
+```python
+from propensity import read_table
+
+rows = read_table("out/RA_pilot.jsonl")
+per_call = rows[["input_tokens", "cached_input_tokens", "output_tokens"]].mean()
+print(per_call.round())   # multiply by your prices per token, then by instances × dimensions
+```
+
 ## 5. Annotate the whole bank
 
 <!-- no-run -->

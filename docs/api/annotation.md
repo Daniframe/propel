@@ -172,7 +172,8 @@ Constants: `PATTERNS` (the three `(method, compiled regex)` pairs, in order), `S
 ## Runner
 
 `propensity.annotation.runner`. Constants:
-- `ROW_FIELDS`: the ten canonical row fields, in order;
+- `ROW_FIELDS`: the thirteen canonical row fields, in order;
+- `USAGE_FIELDS = ("input_tokens", "output_tokens", "cached_input_tokens")`, the last three;
 - `MODES = ("auto", "batch", "sequential")`;
 - `DONE_STATES = ("completed", "failed", "cancelled")`.
 
@@ -204,7 +205,8 @@ Annotates every instance on one dimension with one provider.
 
 **Returns** one row per instance, in input order, including failures
 ([row format](../data-formats.md#annotations)). It also prints the summary line
-`N ok, N parse-failed, N provider-error out of N total`.
+`N ok, N parse-failed, N provider-error out of N total`, then, when the provider reports token
+usage, a totals line such as `tokens: 7,200 input (6,912 cached), 2,550 output, over 3 of 3 rows`.
 
 **Raises**:
 - `ContractError` for a missing, empty or duplicate `question_id`, or a missing or empty
@@ -263,8 +265,14 @@ Parses each completion and returns the rows:
 
 ```python
 summarise(rows) -> str
+summarise_usage(rows) -> str | None
+normalise_usage(usage) -> dict
 ```
-The summary line: `"N ok, N parse-failed, N provider-error out of N total"`.
+- `summarise`: the summary line, `"N ok, N parse-failed, N provider-error out of N total"`.
+- `summarise_usage`: the token totals line, or None when no row reports usage.
+- `normalise_usage`: a provider's raw usage (OpenAI chat completions or responses, Anthropic,
+  Gemini) as `{"input_tokens", "output_tokens", "cached_input_tokens"}`, each an int or None.
+  `rows_from_completions` applies it to every completion.
 
 ```python
 from propensity.annotation import build_requests, collect, rows_from_completions, submit
