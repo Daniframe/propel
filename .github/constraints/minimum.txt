@@ -1,0 +1,12 @@
+# The oldest versions pyproject.toml allows, for every extra at once. google-genai's floor
+# needs httpx>=0.28, so httpx's own floor is checked separately (minimum-http.txt).
+numpy==1.24.1
+scipy==1.10.0
+pandas==2.0.0
+statsmodels==0.14.0
+pyyaml==6.0
+matplotlib==3.8.0
+seaborn==0.13.0
+openai==1.55.3
+anthropic==0.41.0
+google-genai==1.46.0

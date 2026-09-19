@@ -1,0 +1,10 @@
+# The oldest versions pyproject.toml allows for the core and the providers that run on the
+# oldest httpx (numpy 1.24.0 itself; seaborn>=0.13, in minimum.txt, excludes it).
+numpy==1.24.0
+scipy==1.10.0
+pandas==2.0.0
+statsmodels==0.14.0
+pyyaml==6.0
+openai==1.55.3
+anthropic==0.41.0
+httpx==0.24.0

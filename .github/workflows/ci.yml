@@ -1,0 +1,84 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }} · Python ${{ matrix.python }} · ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+        name: [all extras]
+        extras: ["dev,plot,openai,anthropic,google,http,dotenv"]
+        include:
+          # The core alone: every test that needs an SDK or matplotlib must skip cleanly.
+          - {os: ubuntu-latest, python: "3.13", name: core only, extras: "dev"}
+          - {os: windows-latest, python: "3.13", name: core only, extras: "dev"}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[${{ matrix.extras }}]"
+      - name: Test
+        run: python -m pytest -q -W error -p no:cacheprovider
+
+  minimum-versions:
+    # The dependency floors in pyproject.toml are the oldest versions the suite passes with.
+    name: minimum versions · ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: every extra, constraints: .github/constraints/minimum.txt,
+             extras: "dev,plot,openai,anthropic,google,http,dotenv"}
+          - {name: oldest httpx, constraints: .github/constraints/minimum-http.txt,
+             extras: "dev,openai,anthropic,http"}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.10"
+      - name: Install at the floors
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[${{ matrix.extras }}]" -c ${{ matrix.constraints }}
+          python -m pip freeze | grep -iE "^(numpy|scipy|pandas|statsmodels|matplotlib|seaborn|openai|anthropic|google-genai|httpx)=="
+      - name: Test
+        # Old releases emit their own deprecation warnings: shown, not fatal.
+        run: python -m pytest -q -W default -p no:cacheprovider
+
+  package:
+    # Build the distributions, then install the wheel as a user would and run the sdist's tests
+    # against it: this catches files missing from the package, which the tests above cannot.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Build
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build
+          python -m twine check --strict dist/*
+      - name: Install and test the built wheel
+        run: bash .github/scripts/check-dist.sh dist "all,dev"
