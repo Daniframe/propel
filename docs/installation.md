@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python 3.10 or later.
+- Python 3.10 or later; tested on 3.10 to 3.14.
 - The core depends on numpy, scipy, pandas, statsmodels and PyYAML.
 - Everything provider- or plot-specific is an optional extra.
 

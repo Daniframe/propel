@@ -21,13 +21,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python: ["3.10", "3.11", "3.12", "3.13"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         name: [all extras]
         extras: ["dev,plot,openai,anthropic,google,http,dotenv"]
         include:
           # The core alone: every test that needs an SDK or matplotlib must skip cleanly.
-          - {os: ubuntu-latest, python: "3.13", name: core only, extras: "dev"}
-          - {os: windows-latest, python: "3.13", name: core only, extras: "dev"}
+          - {os: ubuntu-latest, python: "3.14", name: core only, extras: "dev"}
+          - {os: windows-latest, python: "3.14", name: core only, extras: "dev"}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Build
         run: |
           python -m pip install --upgrade pip build twine
