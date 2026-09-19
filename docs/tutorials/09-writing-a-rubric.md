@@ -203,15 +203,15 @@ ParsedRange(lower=None, upper=None, parse_ok=False, method=None, error='no prope
 The last one is the style of the rubric's own worked examples. An annotator that imitates it
 instead of following the output contract fails to parse, which the pilot will show.
 
-## 8. Pilot and validate
+## 8. Pilot it
 
 1. **Pilot** 20 instances with the model you intend to use, and read every explanation
    ([Tutorial 3](03-annotating-with-a-provider.md#3-read-every-explanation)). When the reasoning
    is sound but the bounds disagree with yours, the rubric is ambiguous: sharpen the override
    conditions and add worked examples for the disputed cases.
 2. **Annotate** the bank.
-3. **Validate** with incited models ([Tutorial 7](07-validating-with-incitement.md)) before
-   trusting any fitted level.
+3. **Optionally,** check the chain end to end with incited models
+   ([Tutorial 7](07-validating-with-incitement.md)).
 
 ## 9. A new version of a rubric
 
@@ -276,4 +276,4 @@ Once a rubric passes its checks, its pilot and its validation, it can join the p
 - [ ] `check_rubric` returns `[]`.
 - [ ] UTF-8; trailing newline decided and kept.
 - [ ] Trait name fixed in the catalogue.
-- [ ] Mock dry run passes; pilot explanations read; incited levels recovered.
+- [ ] Mock dry run passes; pilot explanations read.

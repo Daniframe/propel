@@ -122,9 +122,9 @@ Compare its intervals with the previous version's on the same instances
 ([how](tutorials/09-writing-a-rubric.md#9-a-new-version-of-a-rubric)). Every change
 in an interval should be one you intended.
 
-**4. Validate it** with incited models, on annotations made with the new version
-([Tutorial 7](tutorials/07-validating-with-incitement.md)). A version that does not recover
-incited levels does not ship.
+**4. Optionally, check it with incited models,** on annotations made with the new version
+([Tutorial 7](tutorials/07-validating-with-incitement.md)). This end-to-end check is an
+extra, not a requirement.
 
 **5. Make it current** in `dimensions.yaml`:
 
@@ -182,8 +182,8 @@ TD:
 aim for `[]`. A rubric that misses some can still be used: annotating with it logs a warning
 naming them.
 
-**5. Pilot, compare with your own judgement, and validate with incited models**, exactly as for
-a new version (steps 3 and 4 above).
+**5. Pilot it and compare with your own judgement**, exactly as for a new version (step 3
+above). The incitement check of step 4 is optional here too.
 
 **6. Pin, regenerate and test** (steps 6 and 7 above). The tests fail until the rubric is
 pinned, catalogued and listed in the docs, so none of these can be forgotten.

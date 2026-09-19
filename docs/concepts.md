@@ -118,10 +118,10 @@ Two empirical views of one subject's data, independent of the fitted model:
   `b_l + b_u = 2·theta` marks the intervals centred on the estimate. A bank whose observations
   sit in a few cells, or far from that line, shows up at a glance.
 
-## Validation
+## An optional end-to-end check
 
-A fitted `theta` means something only once the chain has recovered a level known in advance.
-The check is to incite a model to a level with an explicit system prompt, run it, fit it, and
-compare. Incited `+2` should come back near `+2`. It exercises rubric quality, annotation
-fidelity and the fit together, and should be run per dimension before trusting numbers about
-uninstructed models ([Tutorial 7](tutorials/07-validating-with-incitement.md)).
+One way to see the chain at work is to recover a level known in advance: incite a model to a
+level with an explicit system prompt, run it, fit it, and compare. Incited `+2` should come
+back near `+2`. The check exercises rubric quality, annotation fidelity and the fit together.
+It is an extra worth trying, not a step PROPEL requires
+([Tutorial 7](tutorials/07-validating-with-incitement.md)).

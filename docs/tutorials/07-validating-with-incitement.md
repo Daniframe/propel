@@ -1,9 +1,9 @@
 # Tutorial 7: validating with incited models
 
-Before trusting any `theta` about an uninstructed model, show that the chain recovers levels
-you set yourself: incite a model to each level with a system prompt, run it, fit it, and compare.
-This one check tests the rubric, the annotations and the fit together. Run it for every
-dimension, and again after changing a rubric or the annotating model.
+An optional end-to-end check: incite a model to each level with a system prompt, run it, fit it,
+and see whether the chain recovers the levels you set. It tests the rubric, the annotations and
+the fit together, which makes it worth trying on a dimension you care about, or after changing
+a rubric or the annotating model. It is an extra, not a step PROPEL requires.
 
 PROPEL does not run models, so producing the outcomes is up to you. This tutorial covers what
 to produce, then fits and judges the example data, which was simulated in exactly that shape.

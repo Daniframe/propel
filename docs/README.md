@@ -30,7 +30,7 @@ PROPEL never runs the models being evaluated. You bring their results as a file.
 | 4 | [Batch annotation](tutorials/04-batch-annotation.md) | submit, poll, fetch and recover long batches |
 | 5 | [Preparing outcomes](tutorials/05-preparing-outcomes.md) | shape your results so they join cleanly |
 | 6 | [Fitting and diagnostics](tutorials/06-fitting-and-diagnostics.md) | fit, read the profile table, tune the fit |
-| 7 | [Validating with incited models](tutorials/07-validating-with-incitement.md) | check the chain recovers known levels |
+| 7 | [Validating with incited models](tutorials/07-validating-with-incitement.md) | optionally, check that the chain recovers levels you set |
 | 8 | [Plots](tutorials/08-plots.md) | draw every figure, in files or notebooks |
 | 9 | [Writing a rubric](tutorials/09-writing-a-rubric.md) | write, check, try and version a rubric of your own |
 | 10 | [Adding a provider](tutorials/10-adding-a-provider.md) | connect an API PROPEL does not ship |

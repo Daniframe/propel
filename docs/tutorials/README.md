@@ -11,7 +11,7 @@ in miniature; the rest go deep on one stage each.
 | 4 | [Batch annotation](04-batch-annotation.md) | no (mock rehearsal) | job files, polling, `--wait`, drift, lost ids, failed batches, the Python batch API |
 | 5 | [Preparing outcomes](05-preparing-outcomes.md) | no | long and wide forms, validation, missing values, matching ids, legacy annotation files |
 | 6 | [Fitting and diagnostics](06-fitting-and-diagnostics.md) | no | the profile table, fitting one cell, every diagnostic on a broken bank, fit settings |
-| 7 | [Validating with incited models](07-validating-with-incitement.md) | no | the recovery check that must precede any interpretation |
+| 7 | [Validating with incited models](07-validating-with-incitement.md) | no | an optional end-to-end check: recovering levels you set yourself |
 | 8 | [Plots](08-plots.md) | no | every figure, combined figures, files, notebooks |
 | 9 | [Writing a rubric](09-writing-a-rubric.md) | no | a rubric of your own, its structure check, a new version, checks before spending |
 | 10 | [Adding a provider](10-adding-a-provider.md) | no | a custom provider, its batch version, the path-equivalence check |

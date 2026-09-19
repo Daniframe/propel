@@ -91,11 +91,11 @@ trait names, poles and versions. [Dimensions](https://github.com/Daniframe/prope
 - **Trying a rubric of your own** without changing the package:
   [Tutorial 9](https://github.com/Daniframe/propel/blob/main/docs/tutorials/09-writing-a-rubric.md).
 
-## Before trusting a number
+## An optional end-to-end check
 
-Check that the chain recovers levels you set yourself: incite a model to known levels, fit it,
-and compare ([Tutorial 7](https://github.com/Daniframe/propel/blob/main/docs/tutorials/07-validating-with-incitement.md)). Do it for each
-dimension before interpreting any uninstructed model.
+To see the whole chain at work, incite a model to levels you choose with a system prompt, fit
+it, and check that the levels come back ([Tutorial 7](https://github.com/Daniframe/propel/blob/main/docs/tutorials/07-validating-with-incitement.md)).
+It is an extra, not a step PROPEL requires.
 
 ## Development
 

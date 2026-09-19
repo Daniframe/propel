@@ -184,6 +184,6 @@ Open `out/plots/averse_RA_curve.png`: success peaks near `+2`, and the orange li
 |---|---|
 | `get_provider("mock", response=toy_annotator)` | `get_provider("anthropic", model="claude-haiku-4-5")`, etc. ([Tutorial 3](03-annotating-with-a-provider.md)) |
 | simulated outcomes | your models' 0/1 results, as a file ([Tutorial 5](05-preparing-outcomes.md)) |
-| trusting `theta` | first check that incited models come back at their levels ([Tutorial 7](07-validating-with-incitement.md)) |
+| checking the chain end to end | optionally, incite models to known levels and see them come back ([Tutorial 7](07-validating-with-incitement.md)) |
 
 The same pipeline from the command line: [Tutorial 2](02-command-line.md).
