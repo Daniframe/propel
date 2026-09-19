@@ -81,6 +81,7 @@ profiles = fit_profiles(load_annotations("RA.jsonl"), load_outcomes("my_results.
 | [Data formats](https://github.com/Daniframe/propel/blob/main/docs/data-formats.md) · [Rubrics and prompts](https://github.com/Daniframe/propel/blob/main/docs/rubrics.md) · [Plots](https://github.com/Daniframe/propel/blob/main/docs/plots.md) | the files, the prompts, the figures |
 | [Dimensions](https://github.com/Daniframe/propel/blob/main/docs/dimensions.md) · [Managing rubrics](https://github.com/Daniframe/propel/blob/main/docs/managing-rubrics.md) | every dimension shipped; updating rubrics and adding dimensions |
 | [API reference](https://github.com/Daniframe/propel/blob/main/docs/api/README.md) | every public function |
+| [Stability and versioning](https://github.com/Daniframe/propel/blob/main/docs/stability.md) | what stays stable, and what a version number means |
 
 ## Dimensions
 

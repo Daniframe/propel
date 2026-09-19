@@ -46,3 +46,8 @@ from . import (  # noqa: E402  imported for their self-registration
     mock,
     openai_compat,
 )
+
+__all__ = [
+    "available_providers", "BatchCapable", "BatchRequest", "BatchState", "Completion",
+    "get_provider", "LLMProvider", "ProviderError", "register_provider",
+]

@@ -1,7 +1,8 @@
 # API reference
 
 Everything below is importable from the top-level package: `from propensity import fit_theta`.
-Submodules hold the rest (constants, adapter classes, lower-level helpers).
+Submodules hold the rest (constants, adapter classes, lower-level helpers). What of it is
+promised to stay put, and what a version number means: [Stability](../stability.md).
 
 | Package | Contents | Page |
 |---|---|---|

@@ -28,3 +28,12 @@ from .runner import (
     summarise_usage,
     wait_for_batch,
 )
+
+__all__ = [
+    "annotate", "ANNOTATION_SYSTEM", "as_single_string", "available_dimensions",
+    "available_versions", "build_annotation_prompt", "build_requests", "check_rubric",
+    "collect", "Dimension", "get_dimension", "load_dimensions", "load_presentation",
+    "load_rubric", "normalise_usage", "parse_final_range", "ParsedRange", "provenance",
+    "require_batch", "rows_from_completions", "rubric_path_for", "RUBRICS_DIR",
+    "run_sequential", "submit", "summarise", "summarise_usage", "wait_for_batch",
+]

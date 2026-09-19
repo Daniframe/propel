@@ -26,3 +26,12 @@ class ContractError(PropensityError, ValueError):
 
 class DataWarning(UserWarning):
     """Data that can be used but probably should not be trusted without a look."""
+
+
+class PropensityDeprecationWarning(FutureWarning):
+    """A stable name that still works but will be removed.
+
+    It subclasses FutureWarning, not DeprecationWarning, so that it reaches users: Python hides
+    DeprecationWarning outside __main__. What replaces the name is in the message and in the
+    changelog ([stability](https://github.com/Daniframe/propel/blob/main/docs/stability.md)).
+    """

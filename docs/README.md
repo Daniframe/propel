@@ -48,6 +48,7 @@ PROPEL never runs the models being evaluated. You bring their results as a file.
 | [Rubrics and prompts](rubrics.md) | rubric files and structure, prompt assembly, the output contract, parsing |
 | [Managing rubrics](managing-rubrics.md) | the catalogue; updating a rubric; adding a dimension |
 | [Plots](plots.md) | every figure and how to read it |
+| [Stability and versioning](stability.md) | what stays stable, how names are retired, what a version number means |
 
 ## API reference
 
