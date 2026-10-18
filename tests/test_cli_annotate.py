@@ -8,6 +8,7 @@ import sys
 import pytest
 
 from propensity import providers
+from propensity.annotation.rubrics import load_dimensions
 from propensity.cli.annotate import main
 from propensity.modelling.io import read_table
 from propensity.providers.mock import MockBatchProvider
@@ -209,8 +210,9 @@ def test_the_packaged_rubrics_and_catalogue_need_no_configuration(workspace, mon
 
 
 def test_a_dimension_outside_the_catalogue_needs_a_name(workspace, capsys):
-    assert main(["run", "--instances", str(workspace / "items.jsonl"), "--dimension", "TD",
-                 "--out", str(workspace / "td.jsonl"), "--provider", "mock", "--model", "mock-1",
+    assert "Zz" not in load_dimensions(), "pick a code the catalogue does not ship"
+    assert main(["run", "--instances", str(workspace / "items.jsonl"), "--dimension", "Zz",
+                 "--out", str(workspace / "zz.jsonl"), "--provider", "mock", "--model", "mock-1",
                  "--config", str(workspace / "absent.yaml")]) == 2
     assert "not in the dimension catalogue; pass --propensity-name" in capsys.readouterr().err
 

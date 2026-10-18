@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.0
+
+- **Thirteen new dimensions, from the propensity hierarchy.** The Schwartz basic values
+  — achievement (`Ac`), benevolence (`Bn`), conformity (`Cf`), hedonism (`He`), power
+  (`Pw`), security (`Sc`), self-direction (`SD`), stimulation (`St`), tradition (`Tr`) and
+  universalism (`Un`) — plus conscientiousness (`Cs`), need for power (`Np`) and temporal
+  discounting (`TD`). The package now ships 28 dimensions.
+- **Extraversion and ultracrepidarianism have a `v2`,** the hierarchy's rubric for each, and it
+  is now the catalogue's default. `Ex_v1` and `Ul_v1`, the rubrics behind the paper's
+  annotations, stay in the package: request them with `--rubric-version v1`. Annotations made
+  with `v1` and `v2` are not comparable. This follows what risk aversion did in 0.1.2.
+- **The eleven rubrics already shipped are unchanged,** byte for byte. Comparing them against
+  the hierarchy's showed the same text in different notation, which 0.1.2 had already
+  normalised, so there was nothing to take.
+- **Achievement ships once.** The hierarchy holds it twice, as `achievement_value` and
+  `need_for_achievement`, but both folders carry the same rubric (98.5% identical, both titled
+  "Achievement Propensity").
+- Known gaps in the imported rubrics, all advisory: hedonism has no level -3; conformity,
+  security and tradition have no full-examples section; several lack a degenerate `[0, 0]`
+  example. [Dimensions](docs/dimensions.md#recommended-checks) lists each one.
+
+
 ## 0.3.0
 
 - **Python 3.14 is supported and tested.** The suite runs on 3.10 to 3.14 in CI, on Linux,

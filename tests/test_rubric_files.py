@@ -41,6 +41,22 @@ PINNED_SHA256 = {
     "Nr/Nr_v1.md": "a0b1274cc805f9bdab2589e63fe24ab79e023738768b4a968ccc444f8602d88c",
     "Op/Op_v1.md": "3d54259ca2c401aba195c27a2a709d3db9afe3bf6f8c2a792139c908a266c4a4",
     "Ps/Ps_v1.md": "87b9ee2c9b78b43bac0886c9bd4cceb22548c325a58612c45a2a863b4d9cc0e2",
+    # Added in 0.4.0, from the propensity hierarchy.
+    "Ac/Ac_v1.md": "00e157fee509500b3fda2a4b55c9b111ee46d9eb970b1d43f0e33f81513a4e48",
+    "Bn/Bn_v1.md": "ddbc231fc0ea9929a2a6e9c028aeb483527055a61a9632f54eeaecbb0c6cab78",
+    "Cf/Cf_v1.md": "ce40bc886ffac53c429c1ee44199e3b8de63d145b471afc4021a96faddbe8ac7",
+    "Cs/Cs_v1.md": "a2f0f2812ce8432a05262cafde77328438273421e94d967d09c65e0e97558510",
+    "Ex/Ex_v2.md": "c61183a0dc9a88176a067749203b60b0493891a82ee24196eec99b08072c72be",
+    "He/He_v1.md": "f704b5cd3087a9a08c6655a064549a2bc13ce91269dec207ac852388eaca1b74",
+    "Np/Np_v1.md": "c71ae323da42a79d3a36d968b4b65992b1ee21335ce9ad5c528808cdc53d7386",
+    "Pw/Pw_v1.md": "0aa7d7b26ec73132f894ceaab0f0868bec9121845eb4ef133c15950255751ccc",
+    "SD/SD_v1.md": "0a92f8b60220f1a72ab21523138e3ff55cd3d93574d8497c25e43e2dc209ce09",
+    "Sc/Sc_v1.md": "84d648822b195b4a645028b3c7d7f9ef034e2fc14e72185c8d3fb04ca1fb821a",
+    "St/St_v1.md": "dc619e364e081a26ee29cdd109c33fd2193fd27097e659ee34b8900221a81604",
+    "TD/TD_v1.md": "2eeac288b848e97fc42a21469e7bcc9f1dff05066064e4e4b22a3154a4073e2a",
+    "Tr/Tr_v1.md": "ff2164dff734352525605c6329b92c3967d911ffc81a69f7754ca640367bcfbd",
+    "Ul/Ul_v2.md": "9c89776a815c702d897ac3a8182d6bf4ddf6c53c5686f831c25ff19cf3df57ec",
+    "Un/Un_v1.md": "e71594876713b60f78a839cd167b0644ece5d8f8fcfb0a76f879700de78dc532",
     "presentation.md": "ac528f3004e2501bbc0335d8931f237dd006ffdee8a21744816c73398d6f46a1",  # sans final newlines
 }
 

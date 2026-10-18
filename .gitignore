@@ -6,6 +6,8 @@ reproducibility/
 
 # Local runs against real models, never committed
 live_check/
+Safety test/
+propensity_hierarchy-main
 
 # Where the tutorials write their output
 out/
@@ -39,3 +41,7 @@ Thumbs.db
 
 # Claude Code settings
 .claude/
+
+# The rubric hierarchy working copy: private until the rubric preprint is posted
+propensity_hierarchy-main/
+propensity_hierarchy-main.zip

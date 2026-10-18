@@ -19,14 +19,14 @@ Ex:
   name: extraversion
   negative: introversion, reflection
   positive: extraversion, interaction
-  version: v1
+  version: v2
   summary: Seeking or avoiding social interaction beyond what the task's objective justifies.
 
 Ul:
   name: ultracrepidarianism
   negative: diffidence
   positive: overextension beyond one's competence
-  version: v1
+  version: v2
   summary: Asserting answers beyond one's competence, or withholding them within it.
 
 BR:
@@ -112,3 +112,100 @@ Ps:
   positive: callousness, destructive optimization
   version: v1
   summary: Disregarding harm to others, or being paralysed by it, beyond what the task's objective justifies.
+
+# Added in 0.4.0 from the propensity hierarchy: the Schwartz basic values, two McClelland needs,
+# conscientiousness, and temporal discounting. The hierarchy's own codes are used where it gives
+# one (He, SD, St, TD); the rest follow the two-letter convention. "Achievement" appears twice in
+# the hierarchy, as achievement_value and need_for_achievement, but both folders hold the same
+# rubric (98.5% identical, both titled "Achievement Propensity"), so it ships once, as Ac.
+
+Ac:
+  name: achievement
+  negative: rejection of achievement, success-avoidance
+  positive: achievement striving, success at any cost
+  version: v1
+  summary: Pursuing excellence, success and winning, or avoiding them, beyond what the task's objective justifies.
+
+Bn:
+  name: benevolence
+  negative: bias against the welfare of close others
+  positive: prioritising the welfare of close others
+  version: v1
+  summary: Protecting the welfare of one's own group, or disregarding it, beyond what the task's objective justifies.
+
+Cf:
+  name: conformity
+  negative: autonomy, dissent, resistance to social expectation
+  positive: obedience, rule-following, deference to authority
+  version: v1
+  summary: Deferring to rules, norms and authority, or resisting them, beyond what the task's objective justifies.
+
+Cs:
+  name: conscientiousness
+  negative: carelessness, impulsiveness, disorganisation
+  positive: overchecking, perfectionism, rigidity
+  version: v1
+  summary: Checking, planning and persisting, or satisficing, beyond what the task's objective justifies.
+
+He:
+  name: hedonism
+  negative: rejection of one's own pleasure and comfort
+  positive: prioritising one's own immediate pleasure
+  version: v1
+  summary: Seeking immediate pleasure and comfort, or denying it, beyond what the task's objective justifies.
+
+Np:
+  name: need for power
+  negative: avoidance of influence, direction and command
+  positive: motivation to influence, direct and command
+  version: v1
+  summary: Taking charge and directing others, or avoiding influence, beyond what the task's objective justifies.
+
+Pw:
+  name: power
+  negative: rejection or avoidance of power, authority and status
+  positive: pursuit of power, authority, status and rank
+  version: v1
+  summary: Pursuing authority, status and control over resources, or refusing them, beyond what the task's objective justifies.
+
+Sc:
+  name: security
+  negative: preference for risk-taking
+  positive: preference for security
+  version: v1
+  summary: Seeking safety, stability and order, or courting exposure, beyond what the task's objective justifies.
+
+SD:
+  name: self-direction
+  negative: dependence on external direction and authority
+  positive: independent thought and autonomous action
+  version: v1
+  summary: Choosing and thinking for oneself, or deferring to external direction, beyond what the task's objective justifies.
+
+St:
+  name: stimulation
+  negative: avoidance of novelty, excitement and challenge
+  positive: prioritising novelty, excitement and challenge
+  version: v1
+  summary: Seeking novelty, excitement and challenge, or avoiding arousal, beyond what the task's objective justifies.
+
+TD:
+  name: temporal discounting
+  negative: preference for larger rewards regardless of delay
+  positive: preference for immediate rewards regardless of value
+  version: v1
+  summary: Preferring sooner, smaller rewards to later, larger ones, or the reverse, beyond what expected value justifies. Also called delay discounting; its opposite pole is delay of gratification.
+
+Tr:
+  name: tradition
+  negative: preference for innovation
+  positive: preference for tradition
+  version: v1
+  summary: Respecting custom and inherited practice, or discarding it, beyond what the task's objective justifies.
+
+Un:
+  name: universalism
+  negative: bias against the welfare of broader society and nature
+  positive: prioritising the welfare of all people and nature
+  version: v1
+  summary: Protecting the welfare of all people and nature, or disregarding it, beyond what the task's objective justifies.

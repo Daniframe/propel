@@ -26,7 +26,9 @@ from propensity.errors import ContractError
 PREAMBLE = ("The following is a rubric for determining the propensity of showing bias "
             "towards risk aversion:\n\n<rubric>\n")
 # Every dimension the package ships, sorted. TD is not written yet.
-SHIPPED = ["Af", "Ag", "Al", "BR", "Cm", "Co", "Ex", "IM", "Mc", "Ne", "Nr", "Op", "Ps", "RA", "Ul"]
+SHIPPED = ["Ac", "Af", "Ag", "Al", "BR", "Bn", "Cf", "Cm", "Co",
+           "Cs", "Ex", "He", "IM", "Mc", "Ne", "Np", "Nr", "Op", "Ps",
+           "Pw", "RA", "SD", "Sc", "St", "TD", "Tr", "Ul", "Un"]
 
 
 def test_the_prompt_is_the_four_pieces_with_the_question_on_its_own_line():
@@ -96,8 +98,8 @@ def test_rubric_paths_follow_the_convention():
 
 
 def test_a_missing_rubric_says_which_ones_exist():
-    with pytest.raises(ContractError, match=f"no rubric for dimension 'TD'.*{', '.join(SHIPPED)}"):
-        load_rubric("TD")
+    with pytest.raises(ContractError, match=f"no rubric for dimension 'Zz'.*{', '.join(SHIPPED)}"):
+        load_rubric("Zz")
 
 
 def test_a_missing_version_says_which_versions_exist():
@@ -150,8 +152,8 @@ def test_the_packaged_catalogue_describes_every_dimension():
 
 
 def test_an_unknown_dimension_names_the_known_ones():
-    with pytest.raises(ContractError, match=f"no dimension 'TD' in the catalogue.*known: {', '.join(SHIPPED)}"):
-        get_dimension("TD")
+    with pytest.raises(ContractError, match=f"no dimension 'Zz' in the catalogue.*known: {', '.join(SHIPPED)}"):
+        get_dimension("Zz")
 
 
 def test_the_catalogue_sets_the_version_read_by_default(tmp_path):
