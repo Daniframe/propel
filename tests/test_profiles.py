@@ -49,20 +49,21 @@ def test_a_profile_table_recovers_every_subject_and_dimension():
         assert np.isfinite(row.gof) and np.isfinite(row.reference_ll)
 
 
-def test_a_fit_worse_than_the_unbiased_null_is_flagged():
-    """Zero-width intervals leave the likelihood with a peak about 0.1 wide at each integer. A
-    gradient method started outside it settles on a plateau and reports convergence, so the
-    diagnostics have to say that the fit lost to theta = 0."""
+def test_no_fit_is_worse_than_the_unbiased_null():
+    """Zero-width intervals leave the likelihood with a narrow peak at each integer, and a
+    gradient method started outside one settles on a plateau that loses to theta = 0 while
+    reporting convergence. theta = 0 is a point on the search grid, so the global search
+    cannot return anything worse than it."""
     thetas = {("model-a", "RA"): -1.5, ("model-a", "Ex"): 1.0,
               ("model-b", "RA"): 2.0, ("model-b", "Ex"): 0.0}
     annotations, outcomes = make_data(thetas, seed=1)
     table = fit_profiles(annotations, outcomes)
-    row = table[(table.subject_id == "model-b") & (table.dimension == "Ex")].iloc[0]
+    fitted = table[table.theta.notna()]
 
-    assert row.converged == 1
-    assert row.pseudo_r2 < 0
-    assert row.gof < row.reference_ll
-    assert "worse than theta = 0" in row.warnings
+    assert len(fitted) == 4
+    assert (fitted.gof >= fitted.reference_ll - 1e-9).all()
+    assert (fitted.pseudo_r2 >= 0).all()
+    assert not fitted.warnings.str.contains("worse than theta = 0").any()
 
 
 def test_the_join_report_rides_along():
@@ -144,20 +145,33 @@ def test_subject_and_dimension_filters():
 
 def test_fit_arguments_reach_fit_theta():
     annotations, outcomes = make_data({("m", "RA"): 0.5}, n_items=60, seed=4)
-    robust = fit_profiles(annotations, outcomes)
-    single = fit_profiles(annotations, outcomes, robust=False, likelihood="product")
+    default = fit_profiles(annotations, outcomes)
+    narrow = fit_profiles(annotations, outcomes, grid_range=(-0.25, 0.25), grid_points=101)
 
-    assert robust.iloc[0].n_attempts >= 1
-    assert pd.isna(single.iloc[0].n_attempts)  # robust=False reports no restart counters
-    assert single.iloc[0].theta == pytest.approx(robust.iloc[0].theta, abs=0.05)
+    assert abs(narrow.iloc[0].theta) <= 0.25          # the search was held to the narrow range
+    assert default.iloc[0].theta > 0.25               # which is not where it would have gone
+    assert fit_profiles(annotations, outcomes, likelihood="product").iloc[0].theta == \
+        pytest.approx(default.iloc[0].theta, abs=0.05)
 
 
 def test_non_convergence_is_reported_in_the_same_row_as_the_interval():
+    """A maximum pinned to the edge of the search is not a converged fit, and the row has to
+    say so beside the interval rather than leave a tight interval looking trustworthy."""
     annotations, outcomes = make_data({("m", "RA"): 0.0}, n_items=80, seed=5)
-    table = fit_profiles(annotations, outcomes, maxiter=1, robust=False)
+    table = fit_profiles(annotations, outcomes, grid_range=(4.0, 8.0), grid_points=601)
     row = table.iloc[0]
     assert row.converged == 0
     assert "did not converge" in row.warnings
+
+
+def test_a_degenerate_outcome_column_is_refused_rather_than_fitted():
+    """Every outcome the same is a pipeline failure, not a propensity: theta is not identified
+    and a number for it would be read as behaviour."""
+    annotations, outcomes = make_data({("m", "RA"): 0.0}, n_items=80, seed=6)
+    outcomes = outcomes.assign(outcome=0)
+    row = fit_profiles(annotations, outcomes).iloc[0]
+    assert pd.isna(row.theta)
+    assert "every outcome is a failure" in row.skip_reason
 
 
 def test_profile_vector_gives_one_subject_across_dimensions():

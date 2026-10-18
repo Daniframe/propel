@@ -194,7 +194,6 @@ wrote out/profiles.csv
 | `--dimensions CODE ...` | every annotated dimension | fit only these |
 | `--min-items N` | config `profiles.min_items`, 30 | cells with fewer joined instances are recorded, not fitted |
 | `--likelihood {sum,product}` | config, `sum` | `product` only to reproduce published numbers exactly |
-| `--no-robust` | robust on | one fit attempt, no restarts |
 | `--plots DIR` | off | also write the figures below (needs the `plot` extra) |
 | `--config PATH` | `config/modelling.yaml` | settings file ([Configuration](configuration.md#configmodellingyaml)) |
 

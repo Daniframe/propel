@@ -159,14 +159,14 @@ assert wide["theta"].round(6).tolist() == profiles["theta"].round(6).tolist()
 propel-fit --annotations examples/annotations_RA.jsonl --outcomes examples/outcomes_long.csv \
     --out out/incited.csv --subjects demo-model_RA_-2 demo-model_RA_+2 --min-items 100
 propel-fit --annotations examples/annotations_RA.jsonl --outcomes examples/outcomes_long.csv \
-    --out out/published.csv --likelihood product --no-robust
+    --out out/published.csv --likelihood product
 ```
 
 | Flag | Effect |
 |---|---|
 | `--subjects`, `--dimensions` | fit only these cells |
 | `--min-items N` | record, but skip, cells with fewer joined instances |
-| `--likelihood product --no-robust` | the original published procedure; only to reproduce published numbers |
+| `--likelihood product` | the original published likelihood; only to reproduce published numbers |
 
 ## 6. Plots
 

@@ -156,8 +156,7 @@ clipped to `[1e-10, 1 − 1e-10]`:
 ## `fit_theta`
 
 ```python
-fit_theta(demands, success, *, k=1.0, x_init=None, n_bins=20, lowess_frac=0.4, maxiter=500,
-          robust=True, max_retries=20, patience=2, restart_range=(-5.0, 5.0),
+fit_theta(demands, success, *, k=1.0, grid_range=(-8.0, 8.0), grid_points=3201, refine=True,
           likelihood="sum", min_width=0.1, rho=2.0) -> dict
 ```
 
@@ -168,28 +167,36 @@ Fits one subject's `theta` on one dimension by maximum likelihood.
 | `demands` | required | `(N, 2)` intervals |
 | `success` | required | `(N,)` outcomes, 0/1 only |
 | `k` | `1.0` | base slope (`k_default` in the config file) |
-| `x_init` | the curve's peak | starting point; default is the argmax of the LOWESS-smoothed success-by-centre curve (the median centre when there are fewer than two populated bins) |
-| `n_bins`, `lowess_frac` | `20`, `0.4` | for that curve |
-| `maxiter` | `500` | iterations per attempt |
-| `robust` | `True` | restart when the first attempt does not converge |
-| `max_retries` | `20` | most restarts |
-| `patience` | `2` | stop after this many restarts in a row that do not improve |
-| `restart_range` | `(-5, 5)` | bounds for restarts |
+| `grid_range` | `(-8, 8)` | searched in full on every fit, wider than the -3..+3 scale |
+| `grid_points` | `3201` | points across that range: a step of 0.005 |
+| `refine` | `True` | polish the grid maximum locally, within one grid step |
 | `likelihood` | `"sum"` | `"sum"` or `"product"` |
 | `min_width`, `rho` | `0.1`, `2.0` | the response model's |
 
 **Algorithm:**
-1. **First attempt.** Unbounded BFGS from `x_init`.
-2. **Restarts,** only if the first attempt did not converge, `robust` is set, and the outcomes
-   are not all identical:
-   - bounded L-BFGS-B attempts, starting at points spread outwards from `x_init`, alternating
-     sides;
-   - an attempt *qualifies* if it converged strictly inside `restart_range`;
-   - the search stops at the first qualifying attempt, or after `patience` unproductive ones;
-   - a restart replaces the first attempt only if it qualifies **and** fits better. Estimates
-     are never averaged across attempts.
-3. **Uncertainty.** `se = sqrt(inverse Hessian)`, and `ci95 = theta ± 1.96·se`. `se` is NaN if
-   the curvature is not positive.
+1. **Global search.** The negative log-likelihood is evaluated at every grid point. Items that
+   share an interval share a probability, so this costs one vectorised evaluation per distinct
+   interval, not per item.
+2. **Local refine.** `minimize_scalar` polishes the best grid point within one step of it.
+3. **Profile-likelihood interval.** The 95% interval is where the log-likelihood falls by
+   `CHI2_95_HALF` (1.9207, half the chi-square 95% quantile on one degree of freedom), located
+   by `brentq` between the bracketing grid points. An end the grid never reaches is returned as
+   `-inf` or `+inf`: the data do not bound `theta` on that side.
+
+`se` is that interval's half-width divided by 1.96, so it reads like a standard error, and is
+NaN when an end is open. It is not a curvature estimate.
+
+**Why not a gradient method from a starting point.** Every annotated interval contains 0, so
+near `theta = 0` the model predicts `p = 1` on every item and each failure is pinned at the
+clip; the gradient vanishes and BFGS stops on the plateau and reports convergence. The integer
+bounds and the `e^(rho/w)` slope term also give the surface several maxima - a median of seven
+on real banks - so a local method returns whichever one it started nearest. The inverse-Hessian
+standard error has the matching failure: on a plateau BFGS returns the identity, which prints
+as `se = 1.000` whatever the data say.
+
+The previous optimiser's keyword arguments (`x_init`, `n_bins`, `lowess_frac`, `maxiter`,
+`robust`, `max_retries`, `patience`, `restart_range`) are still accepted, ignored, and
+announced with `PropensityDeprecationWarning`.
 
 **Returns:**
 

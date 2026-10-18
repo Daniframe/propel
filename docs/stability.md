@@ -68,8 +68,8 @@ The profile table, in order:
 
 ```text
 subject_id dimension n_items theta se ci95_lower ci95_upper converged reference_ll gof pseudo_r2
-skip_reason frac_orthogonal n_distinct_intervals outcome_rate n_attempts n_converged
-restart_theta_std warnings
+skip_reason frac_orthogonal n_distinct_intervals outcome_rate identified
+n_local_maxima warnings
 ```
 
 Instances need `question_id` and `question_text`; outcomes need `question_id`, `subject_id`

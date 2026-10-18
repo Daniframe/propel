@@ -65,7 +65,11 @@ print(fit_diagnostics(demands, success, fit=fit))
 {'n_items': 117, 'frac_orthogonal': 0.3333333333333333, 'n_distinct_intervals': 7, 'outcome_rate': 0.6923076923076923, 'refuse': False, 'warnings': []}
 ```
 
-`n_attempts` is 1: the first attempt converged, so no restarts were needed.
+`convergence` is 1.0 because the maximum lies inside the search grid and both ends of the
+interval are closed, and `identified` is 1.0 because the data can locate `theta` at all.
+`n_local_maxima` counts the maxima the search found: where it is above 1, a local optimiser
+would have returned whichever one it started nearest, which is why the fit searches the
+whole range instead.
 
 ## 3. Banks that cannot measure
 
@@ -160,18 +164,16 @@ The full list of checks and thresholds: [Diagnostics](../concepts.md#diagnostics
 
 ## 4. Tune the fit
 
-Every setting is a keyword argument of `fit_profiles`, passed on to `fit_theta`. All but
-`max_retries` and `patience` are also keys in `config/modelling.yaml` for `propel-fit`
+Every setting is a keyword argument of `fit_profiles`, passed on to `fit_theta`, and each is
+also a key in `config/modelling.yaml` for `propel-fit`
 ([Configuration](../configuration.md#configmodellingyaml)).
 
 ```python
 settings = {
     "min_items": 30,                # fewer joined instances: record, do not fit
-    "robust": True,                 # restart when the first attempt does not converge
-    "restart_range": (-5.0, 5.0),   # restarts stay inside this range
-    "max_retries": 20,              # most restarts
-    "patience": 2,                  # stop after this many unproductive restarts in a row
-    "maxiter": 500,                 # iterations per attempt
+    "grid_range": (-8.0, 8.0),      # the whole of this is searched, every time
+    "grid_points": 3201,            # a step of 0.005 across that range
+    "refine": True,                 # polish the grid maximum locally
     "likelihood": "sum",            # "product" only to reproduce published numbers
 }
 tuned = fit_profiles(annotations, outcomes, **settings)
@@ -180,11 +182,10 @@ tuned = fit_profiles(annotations, outcomes, **settings)
 `k`, `min_width` and `rho` change the response model itself. Leave them at their defaults
 unless you are studying the model: estimates fitted under different values are not comparable.
 
-**Reproducing published numbers.** The original pipeline used the product likelihood without
-restarts:
+**Reproducing published numbers.** The original pipeline used the product likelihood:
 
 ```python
-published = fit_profiles(annotations, outcomes, likelihood="product", robust=False)
+published = fit_profiles(annotations, outcomes, likelihood="product")
 print(f"largest difference: {(published['theta'] - profiles['theta']).abs().max():.1e}")
 ```
 

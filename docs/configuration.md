@@ -77,11 +77,11 @@ propensity:
   min_width: 0.1
   rho: 2.0
   k_default: 1.0
+  grid_range: [-8.0, 8.0]
+  grid_points: 3201
+  refine: true
   n_bins: 20
   lowess_frac: 0.4
-  maxiter: 500
-  robust: true
-  restart_range: [-5.0, 5.0]
   likelihood: sum
 
 profiles:
@@ -93,11 +93,11 @@ profiles:
 | `propensity.min_width` | `0.1` | none | intervals narrower than this are widened outwards before computing steepness |
 | `propensity.rho` | `2.0` | none | how fast steepness grows as an interval narrows |
 | `propensity.k_default` | `1.0` | none | base slope of the response model |
-| `propensity.n_bins` | `20` | none | bins for the starting-point curve, and for `--plots` curves |
+| `propensity.grid_range` | `[-8, 8]` | none | the whole of this range is searched for the maximum, every fit. It is wider than the -3..+3 scale so that a fit wanting to leave the scale is visible rather than pinned to a boundary |
+| `propensity.grid_points` | `3201` | none | points across that range: a step of 0.005 |
+| `propensity.refine` | `true` | none | polish the grid maximum locally, so the estimate is not quantised to the grid |
+| `propensity.n_bins` | `20` | none | bins for the empirical curve and `--plots` curves (not the fit) |
 | `propensity.lowess_frac` | `0.4` | none | LOWESS bandwidth for the same |
-| `propensity.maxiter` | `500` | none | optimiser iterations per attempt |
-| `propensity.robust` | `true` | `--no-robust` | guarded restarts when the first attempt does not converge |
-| `propensity.restart_range` | `[-5, 5]` | none | bounds for the restarts |
 | `propensity.likelihood` | `sum` | `--likelihood` | `sum` (stable) or `product` (only to reproduce published numbers exactly) |
 | `profiles.min_items` | `30` | `--min-items` | cells with fewer joined instances are recorded but not fitted |
 

@@ -25,9 +25,9 @@ from . import load_config
 
 DEFAULT_CONFIG = "config/modelling.yaml"
 # config/modelling.yaml key -> fit_theta argument
-FIT_SETTINGS = {"k_default": "k", "n_bins": "n_bins", "lowess_frac": "lowess_frac",
-                "maxiter": "maxiter", "robust": "robust", "restart_range": "restart_range",
-                "likelihood": "likelihood", "min_width": "min_width", "rho": "rho"}
+FIT_SETTINGS = {"k_default": "k", "grid_range": "grid_range", "grid_points": "grid_points",
+                "refine": "refine", "likelihood": "likelihood", "min_width": "min_width",
+                "rho": "rho"}
 
 
 def build_parser():
@@ -43,7 +43,6 @@ def build_parser():
     parser.add_argument("--likelihood", choices=("sum", "product"),
                         help="'sum' (default, stable) or 'product' (only to reproduce published "
                              "numbers exactly)")
-    parser.add_argument("--no-robust", action="store_true", help="a single fit attempt, no guarded restarts")
     parser.add_argument("--plots", metavar="DIR",
                         help="also draw every cell's propensity curve and surface, and every "
                              'dimension\'s interval distribution and tree, into DIR (needs "propensity[plot]")')
@@ -59,8 +58,6 @@ def resolve_settings(args):
         fit_kwargs["restart_range"] = tuple(fit_kwargs["restart_range"])
     if args.likelihood:
         fit_kwargs["likelihood"] = args.likelihood
-    if args.no_robust:
-        fit_kwargs["robust"] = False
 
     min_items = args.min_items
     if min_items is None:

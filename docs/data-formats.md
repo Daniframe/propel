@@ -187,8 +187,8 @@ The output of `fit_profiles` and `propel-fit`: one row per (subject, dimension),
 that could not be fitted.
 
 ```csv
-subject_id,dimension,n_items,theta,se,ci95_lower,ci95_upper,converged,reference_ll,gof,pseudo_r2,skip_reason,frac_orthogonal,n_distinct_intervals,outcome_rate,n_attempts,n_converged,restart_theta_std,warnings
-gpt-4o,RA,487,-1.34,0.011,-1.36,-1.32,1,-312.44,-238.91,0.235,,0.12,19,0.61,,,,
+subject_id,dimension,n_items,theta,se,ci95_lower,ci95_upper,converged,reference_ll,gof,pseudo_r2,skip_reason,frac_orthogonal,n_distinct_intervals,outcome_rate,identified,n_local_maxima,warnings
+gpt-4o,RA,487,-1.34,0.011,-1.36,-1.32,1,-312.44,-238.91,0.235,,0.12,19,0.61,1,4,
 ```
 
 | Column | Meaning |
@@ -196,9 +196,9 @@ gpt-4o,RA,487,-1.34,0.011,-1.36,-1.32,1,-312.44,-238.91,0.235,,0.12,19,0.61,,,,
 | `subject_id`, `dimension` | the cell |
 | `n_items` | joined instances |
 | `theta` | fitted level; empty when not fitted |
-| `se` | standard error |
-| `ci95_lower`, `ci95_upper` | `theta ± 1.96·se` |
-| `converged` | 1 or 0; empty when not fitted. Read it with the interval |
+| `se` | the profile interval's half-width, as a standard error; empty when an end is open |
+| `ci95_lower`, `ci95_upper` | 95% profile-likelihood interval. `-inf` or `inf` means the data do not bound `theta` on that side |
+| `converged` | 1 when the maximum is interior to the search grid and both ends of the interval are closed; empty when not fitted. Read it with the interval |
 | `reference_ll` | log-likelihood at `theta = 0` |
 | `gof` | log-likelihood at `theta` |
 | `pseudo_r2` | `1 − gof / reference_ll`; negative means worse than `theta = 0` |
@@ -206,7 +206,8 @@ gpt-4o,RA,487,-1.34,0.011,-1.36,-1.32,1,-312.44,-238.91,0.235,,0.12,19,0.61,,,,
 | `frac_orthogonal` | share of `[-3, +3]` instances |
 | `n_distinct_intervals` | distinct intervals in the cell |
 | `outcome_rate` | share of successes |
-| `n_attempts`, `n_converged`, `restart_theta_std` | restart statistics, when the fit used robust restarts |
+| `identified` | 0 when the data cannot locate `theta`: every outcome the same, or an open interval |
+| `n_local_maxima` | maxima the grid search found. More than one means a local optimiser's answer would depend on where it started |
 | `warnings` | every diagnostic this cell triggered, joined by `; ` |
 
 `skip_reason` values:

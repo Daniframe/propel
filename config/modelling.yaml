@@ -4,11 +4,11 @@ propensity:
   min_width: 0.1       # floor on interval width before computing discrimination
   rho: 2.0             # how fast discrimination grows as width shrinks
   k_default: 1.0       # shared slope k1 = k2 when fitting
-  n_bins: 20           # bins for the empirical curve and the LOWESS starting point
-  lowess_frac: 0.4     # LOWESS bandwidth
-  maxiter: 500         # optimiser iterations per attempt
-  robust: true         # guarded restarts when the first attempt does not converge
-  restart_range: [-5.0, 5.0]
+  grid_range: [-8.0, 8.0]   # the likelihood is searched over all of this, then refined locally
+  grid_points: 3201         # a step of 0.005 over that range
+  refine: true              # polish the grid maximum so the estimate is not quantised
+  n_bins: 20           # bins for the empirical curve (curves and plots, not the fit)
+  lowess_frac: 0.4     # LOWESS bandwidth, likewise
   likelihood: sum      # "product" only to reproduce published numbers bit for bit
 
 profiles:

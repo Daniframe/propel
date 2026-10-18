@@ -84,7 +84,8 @@ def test_subject_and_dimension_filters_reach_the_sweep(tmp_path):
 def test_the_config_file_supplies_settings_and_flags_win(tmp_path, capsys):
     write_inputs(tmp_path, legacy=False)
     (tmp_path / "modelling.yaml").write_text(
-        "propensity:\n  likelihood: product\n  robust: false\nprofiles:\n  min_items: 500\n",
+        "propensity:\n  likelihood: product\n  grid_range: [-0.25, 0.25]\n  grid_points: 101\n"
+        "profiles:\n  min_items: 500\n",
         encoding="utf-8")
 
     code, out = run(tmp_path, config="modelling.yaml")
@@ -98,7 +99,7 @@ def test_the_config_file_supplies_settings_and_flags_win(tmp_path, capsys):
     assert code == 0
     table = pd.read_csv(out)
     assert table.theta.notna().all()
-    assert table.n_attempts.isna().all()  # robust: false came from the config
+    assert (table.theta.abs() <= 0.25).all()  # the config's grid_range held the search
 
 
 def test_a_contract_error_is_reported_without_a_traceback(tmp_path, capsys):

@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.5.0
+
+**Every fitted number changes.** Estimates from earlier versions are not comparable with these,
+and the reason is that the old ones were often wrong.
+
+- **The fit searches the whole range instead of descending from a starting point.** The
+  likelihood is evaluated on a 3,201-point grid over `theta` in [-8, +8] and the best point is
+  then refined locally. Every annotated interval contains 0, so near `theta = 0` the model
+  predicts `p = 1` on every item and each failure is pinned at the clip floor: the gradient
+  vanishes, and BFGS stopped there and reported convergence. The integer bounds and the
+  `e^(rho/w)` slope term also leave several local maxima - a median of seven on real banks - so
+  which one a local method found depended on where it started.
+- **Confidence intervals are profile-likelihood intervals,** where the log-likelihood falls by
+  half the chi-square 95% quantile. The previous intervals came from BFGS's inverse-Hessian
+  approximation, which on a plateau is the identity matrix and prints as `se = 1.000` whatever
+  the data say. An end the search never reaches is now reported as `-inf` or `+inf` rather than
+  as a number: the data do not bound `theta` on that side.
+- **`se` is the interval's half-width** expressed as a standard error, and empty when an end is
+  open. It is not a curvature estimate.
+- **Degenerate outcome columns are refused, not fitted.** A cell where every outcome is a
+  success or every outcome is a failure carries nothing to locate `theta` with; it is almost
+  always an API or judging failure, and a number for it reads as behaviour. It is now recorded
+  with a `skip_reason`, like an over-orthogonal bank.
+- **New columns:** `identified` (0 when the data cannot locate `theta` at all) and
+  `n_local_maxima` (how many maxima the search found; above 1, a local optimiser's answer would
+  have depended on its starting point). They replace `n_attempts`, `n_converged` and
+  `restart_theta_std`, which described restarts that no longer happen.
+- **Retired:** `--no-robust`, and the `robust`, `restart_range`, `max_retries`, `patience`,
+  `maxiter` and `x_init` arguments. They are still accepted, ignored, and announced with
+  `PropensityDeprecationWarning`. `config/modelling.yaml` gains `grid_range`, `grid_points` and
+  `refine`.
+
+
 ## 0.4.0
 
 - **Thirteen new dimensions, from the propensity hierarchy.** The Schwartz basic values
