@@ -4,8 +4,11 @@ propensity:
   min_width: 0.1       # floor on interval width before computing discrimination
   rho: 2.0             # how fast discrimination grows as width shrinks
   k_default: 1.0       # shared slope k1 = k2 when fitting
-  grid_range: [-8.0, 8.0]   # the likelihood is searched over all of this, then refined locally
-  grid_points: 3201         # a step of 0.005 over that range
+  grid_range: [-8.0, 8.0]   # the likelihood is searched over all of this, then refined locally.
+                            # Wider than the -3..+3 scale on purpose: +-8 is where the model gives
+                            # the widest interval the scale allows, [-3, +3], a success chance
+                            # below 1e-3, so a fit that runs past it is unidentified, not extreme.
+  grid_step: 0.005          # resolution, independent of the range above
   refine: true              # polish the grid maximum so the estimate is not quantised
   n_bins: 20           # bins for the empirical curve (curves and plots, not the fit)
   lowess_frac: 0.4     # LOWESS bandwidth, likewise

@@ -78,7 +78,7 @@ propensity:
   rho: 2.0
   k_default: 1.0
   grid_range: [-8.0, 8.0]
-  grid_points: 3201
+  grid_step: 0.005
   refine: true
   n_bins: 20
   lowess_frac: 0.4
@@ -93,8 +93,8 @@ profiles:
 | `propensity.min_width` | `0.1` | none | intervals narrower than this are widened outwards before computing steepness |
 | `propensity.rho` | `2.0` | none | how fast steepness grows as an interval narrows |
 | `propensity.k_default` | `1.0` | none | base slope of the response model |
-| `propensity.grid_range` | `[-8, 8]` | none | the whole of this range is searched for the maximum, every fit. It is wider than the -3..+3 scale so that a fit wanting to leave the scale is visible rather than pinned to a boundary |
-| `propensity.grid_points` | `3201` | none | points across that range: a step of 0.005 |
+| `propensity.grid_range` | `[-8, 8]` | none | the whole of this range is searched for the maximum, every fit. Wider than the -3..+3 scale on purpose: ±8 is where the model gives the widest interval the scale allows, `[-3, +3]`, a success probability below 1e-3, so a fit that wants to run past it is unidentified rather than extreme, and is flagged as such |
+| `propensity.grid_step` | `0.005` | none | resolution of the search, independent of the range: the number of points is derived from the two. Set `grid_points` instead to fix a count directly |
 | `propensity.refine` | `true` | none | polish the grid maximum locally, so the estimate is not quantised to the grid |
 | `propensity.n_bins` | `20` | none | bins for the empirical curve and `--plots` curves (not the fit) |
 | `propensity.lowess_frac` | `0.4` | none | LOWESS bandwidth for the same |

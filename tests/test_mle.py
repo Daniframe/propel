@@ -209,6 +209,40 @@ def test_local_maxima_are_counted():
     assert fit_theta(demands, success)["n_local_maxima"] >= 1
 
 
+def test_the_default_range_is_where_the_most_permissive_item_is_predicted_to_fail():
+    """Why +-8 and not another number: it is where the model gives the widest interval the
+    scale allows a success probability below 1e-3, past which it predicts failure on every
+    item of every bank and only an unidentified cell keeps improving."""
+    edge = mle.GRID_RANGE[1]
+    assert two_sided_sigma(edge, -3, 3) < 1e-3
+    assert two_sided_sigma(edge - 1, -3, 3) > 1e-3        # and no wider than it needs to be
+    assert mle.GRID_RANGE == (-edge, edge)
+
+
+def test_the_step_is_fixed_so_the_range_does_not_change_the_resolution():
+    """Fixing the point count instead would mean narrowing the search silently sharpened it."""
+    demands, success = simulate(1.2, n_items=300, seed=9)
+    default = fit_theta(demands, success)
+    narrow = fit_theta(demands, success, grid_range=(-3.0, 3.0))
+    wide = fit_theta(demands, success, grid_range=(-20.0, 20.0))
+
+    assert default["n_grid_points"] == 3201                       # 16 units at 0.005
+    assert narrow["n_grid_points"] == 1201                        # 6 units at the same 0.005
+    assert wide["n_grid_points"] == 8001                          # 40 units, likewise
+    assert narrow["theta_hat"] == pytest.approx(default["theta_hat"], abs=1e-6)
+    assert wide["theta_hat"] == pytest.approx(default["theta_hat"], abs=1e-6)
+
+
+@pytest.mark.parametrize("kwargs,match", [
+    ({"grid_range": (3.0, -3.0)}, "high > low"),
+    ({"grid_step": 0}, "grid_step must be positive"),
+])
+def test_a_malformed_grid_is_rejected(kwargs, match):
+    demands, success = simulate(0.5, n_items=60, seed=1)
+    with pytest.raises(ValueError, match=match):
+        fit_theta(demands, success, **kwargs)
+
+
 def test_a_finer_grid_does_not_move_the_estimate():
     demands, success = simulate(1.2, n_items=300, seed=9)
     coarse = fit_theta(demands, success, grid_points=801)

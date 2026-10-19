@@ -25,7 +25,7 @@ from . import load_config
 
 DEFAULT_CONFIG = "config/modelling.yaml"
 # config/modelling.yaml key -> fit_theta argument
-FIT_SETTINGS = {"k_default": "k", "grid_range": "grid_range", "grid_points": "grid_points",
+FIT_SETTINGS = {"k_default": "k", "grid_range": "grid_range", "grid_step": "grid_step", "grid_points": "grid_points",
                 "refine": "refine", "likelihood": "likelihood", "min_width": "min_width",
                 "rho": "rho"}
 

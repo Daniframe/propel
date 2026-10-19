@@ -25,10 +25,21 @@ from .model import two_sided_sigma
 P_CLIP = 1e-10
 LIKELIHOODS = ("sum", "product")
 
-# The search: 3,201 points over [-8, +8] is a step of 0.005, wide enough to show that a fit
-# wants to run past the -3..+3 scale and fine enough that the local refine only polishes.
+# The search runs over GRID_RANGE in steps of GRID_STEP.
+#
+# The range is not a round number: +-8 is where the model gives the most permissive item the
+# scale allows - the widest interval, [-3, +3] - a success probability below 1e-3 (solving
+# two_sided_sigma(theta, -3, 3) = 1e-3 gives 7.96). Past that the model predicts failure on
+# every item of every possible bank, so the only cells whose likelihood still improves are
+# those with no successes at all, where no finite bound is right and `identified` says so.
+# Empirically it is generous: over the 485 cells of the paper and the safety battery, no
+# identified maximum passes |theta| = 4.7.
+#
+# The step, not the number of points, is the parameter. Fixing the count instead would couple
+# resolution to the range, so that narrowing the search silently sharpened it.
 GRID_RANGE = (-8.0, 8.0)
-GRID_POINTS = 3201
+GRID_STEP = 0.005
+GRID_POINTS = 3201   # what GRID_RANGE and GRID_STEP give; kept for callers that pass a count
 # Half of the 95% chi-square quantile on one degree of freedom: the profile-likelihood cutoff.
 CHI2_95_HALF = 1.9207294123884402
 _LEGACY = {"x_init": None, "n_bins": 20, "lowess_frac": 0.4, "maxiter": 500, "robust": True,
@@ -62,13 +73,16 @@ def neg_log_likelihood(theta, demands, success, k=1.0, *, likelihood="sum", min_
     raise ValueError(f"likelihood must be one of {LIKELIHOODS}, got {likelihood!r}")
 
 
-def fit_theta(demands, success, *, k=1.0, grid_range=GRID_RANGE, grid_points=GRID_POINTS,
-              refine=True, likelihood="sum", min_width=0.1, rho=2.0, **legacy) -> dict:
+def fit_theta(demands, success, *, k=1.0, grid_range=GRID_RANGE, grid_step=GRID_STEP,
+              grid_points=None, refine=True, likelihood="sum", min_width=0.1, rho=2.0,
+              **legacy) -> dict:
     """Fits theta by maximum likelihood (Eq. 6), by global search and a local refine.
 
     demands: (N, 2) array-like of (b_l, b_u). success: (N,) array-like of 0/1.
-    grid_range, grid_points: the search. The grid is wider than the -3..+3 scale so that a fit
-        wanting to leave it is visible rather than silently pinned to a boundary.
+    grid_range, grid_step: the search. The range is wider than the -3..+3 scale so that a fit
+        wanting to leave it is visible rather than silently pinned to a boundary; its default is
+        derived above. Changing the range does not change the resolution.
+    grid_points: a point count instead of a step, when a caller wants to set it directly.
     refine: polish the grid maximum within one grid step, so the estimate is not quantised.
 
     Returns theta_hat; the profile-likelihood interval as ci95_lower / ci95_upper, with se as
@@ -90,7 +104,14 @@ def fit_theta(demands, success, *, k=1.0, grid_range=GRID_RANGE, grid_points=GRI
         return neg_log_likelihood(theta, demands, success, k, likelihood=likelihood,
                                   min_width=min_width, rho=rho)
 
-    thetas = np.linspace(grid_range[0], grid_range[1], int(grid_points))
+    low, high = float(grid_range[0]), float(grid_range[1])
+    if high <= low:
+        raise ValueError(f"grid_range must be (low, high) with high > low, got {grid_range}")
+    if grid_points is None:
+        if not grid_step > 0:
+            raise ValueError(f"grid_step must be positive, got {grid_step}")
+        grid_points = int(round((high - low) / grid_step)) + 1
+    thetas = np.linspace(low, high, int(grid_points))
     curve = _nll_on_grid(demands, success, thetas, k, likelihood, min_width, rho)
     best = int(np.argmin(curve))
     theta_hat, nll_hat = float(thetas[best]), float(curve[best])

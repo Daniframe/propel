@@ -156,8 +156,8 @@ clipped to `[1e-10, 1 − 1e-10]`:
 ## `fit_theta`
 
 ```python
-fit_theta(demands, success, *, k=1.0, grid_range=(-8.0, 8.0), grid_points=3201, refine=True,
-          likelihood="sum", min_width=0.1, rho=2.0) -> dict
+fit_theta(demands, success, *, k=1.0, grid_range=(-8.0, 8.0), grid_step=0.005,
+          grid_points=None, refine=True, likelihood="sum", min_width=0.1, rho=2.0) -> dict
 ```
 
 Fits one subject's `theta` on one dimension by maximum likelihood.
@@ -167,8 +167,9 @@ Fits one subject's `theta` on one dimension by maximum likelihood.
 | `demands` | required | `(N, 2)` intervals |
 | `success` | required | `(N,)` outcomes, 0/1 only |
 | `k` | `1.0` | base slope (`k_default` in the config file) |
-| `grid_range` | `(-8, 8)` | searched in full on every fit, wider than the -3..+3 scale |
-| `grid_points` | `3201` | points across that range: a step of 0.005 |
+| `grid_range` | `(-8, 8)` | searched in full on every fit. Wider than the -3..+3 scale on purpose: ±8 is where the model gives the widest interval the scale allows, `[-3, +3]`, a success probability below 1e-3. Past that it predicts failure on every item of every bank, so the only cells whose likelihood keeps improving are those with no successes at all, which `identified` reports. Over the 485 cells of the paper and the safety battery, no identified maximum passes `|theta|` = 4.7 |
+| `grid_step` | `0.005` | resolution, independent of the range: the point count is derived from the two, so narrowing the range does not silently sharpen the grid |
+| `grid_points` | `None` | a count instead of a step, when you would rather set it directly |
 | `refine` | `True` | polish the grid maximum locally, within one grid step |
 | `likelihood` | `"sum"` | `"sum"` or `"product"` |
 | `min_width`, `rho` | `0.1`, `2.0` | the response model's |
