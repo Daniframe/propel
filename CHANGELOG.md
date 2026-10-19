@@ -29,8 +29,16 @@ and the reason is that the old ones were often wrong.
   `restart_theta_std`, which described restarts that no longer happen.
 - **Retired:** `--no-robust`, and the `robust`, `restart_range`, `max_retries`, `patience`,
   `maxiter` and `x_init` arguments. They are still accepted, ignored, and announced with
-  `PropensityDeprecationWarning`. `config/modelling.yaml` gains `grid_range`, `grid_points` and
+  `PropensityDeprecationWarning`. `config/modelling.yaml` gains `grid_range`, `grid_step` and
   `refine`.
+- **The search range is derived, not chosen.** `grid_range` defaults to `[-8, +8]` because that
+  is where the model gives the widest interval the scale allows, `[-3, +3]`, a success
+  probability below 1e-3: past it the model predicts failure on every item of every bank, so a
+  fit that still improves out there is unidentified rather than extreme, and says so. Over the
+  485 cells of the paper and the safety battery, no identified maximum passes `|theta|` = 4.7.
+- **`grid_step`, not `grid_points`.** Resolution is now independent of the range; fixing a point
+  count meant narrowing the search silently sharpened the grid. Pass `grid_points` to set a
+  count directly.
 
 
 ## 0.4.0
