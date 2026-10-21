@@ -5,8 +5,20 @@ what it would not. Researched 19–20 September 2026; prices and free tiers move
 before relying on any line here. Claims marked **unverified** come from secondary sources.
 
 Why it matters: every adapter is covered by tests against fake clients, and `test_adapters.py`
-builds each SDK's real client, but **no adapter has ever completed a real annotation call**.
-That is the main thing keeping PROPEL below 1.0.
+builds each SDK's real client, but until October 2026 **no adapter had ever completed a real
+annotation call**. That was the main thing keeping PROPEL below 1.0.
+
+**`google` is now proven end to end.** On 21 October 2026 it annotated the 200-instance
+MetaSafetyBench sample battery on `gemini-3.8-flash` from a Kaggle notebook: two dimensions
+completed (400 calls, 388 parsed) before the run was stopped by hand. Authentication, the
+`system_instruction` transport, usage reporting, interval parsing and the written rows all
+worked on the first real attempt. Two defects surfaced, neither in the request path: the
+notebook's progress lines were swallowed by a `redirect_stdout` (notebook-side), and an empty
+response dropped its finish reason when the SDK returned it as a plain string rather than an
+enum (fixed in 0.5.2, with the fake extended to cover both shapes).
+
+What that leaves: `openai`, `azure`, `anthropic` and `http` still have no real annotation call
+behind them, and no batch path has ever been submitted to a real queue.
 
 ## What a test needs
 
