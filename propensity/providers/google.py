@@ -52,9 +52,16 @@ class GoogleProvider:
         raw = response.model_dump() if hasattr(response, "model_dump") else None
         if not text:  # a safety block or a spent token budget, most likely: say which
             candidate = (getattr(response, "candidates", None) or [None])[0]
-            reason = getattr(getattr(candidate, "finish_reason", None), "value", None)
+            reason = _reason_name(getattr(candidate, "finish_reason", None))
+            detail = f"finish reason {reason}" if reason else None
+            if detail is None:
+                # A prompt the model declined to read has no candidate to carry a finish
+                # reason: the reason sits on the response instead.
+                feedback = getattr(response, "prompt_feedback", None)
+                blocked = _reason_name(getattr(feedback, "block_reason", None))
+                detail = f"blocked before the model read it: {blocked}" if blocked else None
             return Completion(text="", raw=raw, error="the provider returned an empty response"
-                              + (f" (finish reason {reason})" if reason else ""))
+                              + (f" ({detail})" if detail else ""))
         return Completion(text=text, raw=raw, usage=(raw or {}).get("usage_metadata"))
 
     def config(self, system: str, temperature: float, max_tokens) -> dict:
@@ -68,6 +75,22 @@ class GoogleProvider:
         if max_tokens is not None:
             config["max_output_tokens"] = max_tokens
         return {**config, **self.config_options}
+
+
+def _reason_name(value) -> str | None:
+    """A finish or block reason as a readable name.
+
+    The SDK returns these as an enum in some versions and a plain string in others, and reading
+    only one of the two shapes meant an empty response came back with no reason attached - which
+    is the one case where the reason is the whole message.
+    """
+    if value is None:
+        return None
+    for attribute in ("name", "value"):
+        name = getattr(value, attribute, None)
+        if isinstance(name, str) and name:
+            return name
+    return str(value) or None
 
 
 register_provider("google", GoogleProvider)

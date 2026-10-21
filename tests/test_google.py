@@ -60,6 +60,32 @@ def test_an_empty_response_is_an_error_that_names_the_finish_reason(text):
     assert completion.error == "the provider returned an empty response (finish reason SAFETY)"
 
 
+@pytest.mark.parametrize("shape", ["value", "name", "plain"])
+def test_the_finish_reason_is_read_however_the_sdk_represents_it(shape):
+    """An enum in some SDK versions, a plain string in others. Reading only one of them left
+    an empty response with no reason attached, which is the one case where the reason is the
+    whole message."""
+    client = FakeGenAIClient("", finish_reason="MAX_TOKENS", reason_shape=shape)
+    completion = GoogleProvider(MODEL, client=client).complete("S", "U")
+    assert completion.error == ("the provider returned an empty response "
+                                "(finish reason MAX_TOKENS)")
+
+
+@pytest.mark.parametrize("shape", ["value", "name", "plain"])
+def test_a_prompt_blocked_before_the_model_read_it_says_so(shape):
+    """A blocked prompt comes back with no candidates, so the reason is on the response."""
+    client = FakeGenAIClient("", block_reason="PROHIBITED_CONTENT", reason_shape=shape)
+    completion = GoogleProvider(MODEL, client=client).complete("S", "U")
+    assert completion.error == ("the provider returned an empty response "
+                                "(blocked before the model read it: PROHIBITED_CONTENT)")
+
+
+def test_an_empty_response_with_no_reason_at_all_still_reports_cleanly():
+    client = FakeGenAIClient("", finish_reason=None)
+    completion = GoogleProvider(MODEL, client=client).complete("S", "U")
+    assert completion.error == "the provider returned an empty response"
+
+
 def test_google_registers_itself_and_runs_one_call_at_a_time():
     provider = get_provider("google", model=MODEL, client=FakeGenAIClient())
     assert isinstance(provider, LLMProvider) and not isinstance(provider, BatchCapable)

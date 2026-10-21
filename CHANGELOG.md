@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.2
+
+- **Fixed: an empty Gemini response now says why it was empty.** The adapter read the finish
+  reason only as `reason.value`, so when the SDK returned a plain string the reason was dropped
+  and the error read "the provider returned an empty response" with nothing after it - the one
+  case where the reason is the whole message. It now reads either shape, and a prompt blocked
+  before the model read it (which comes back with no candidates at all) reports its
+  `block_reason` instead of nothing.
+  The fake client in the tests only modelled the shape the code happened to read, which is why
+  the tests were green; it now covers all of them.
+
+
 ## 0.5.1
 
 - **Fixed: a rubric check reported a sentence that was there.** The propensity-range check

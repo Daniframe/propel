@@ -144,11 +144,20 @@ class FakeGenAIClient:
     """models.generate_content, returning `.text`, `.candidates` and usage_metadata."""
 
     def __init__(self, text="answer", *, respond=None, usage=None, raises=None,
-                 finish_reason="STOP"):
+                 finish_reason="STOP", reason_shape="value", block_reason=None):
+        """reason_shape picks how the finish reason is represented, because the SDK returns an
+        enum in some versions and a plain string in others: "value", "name" or "plain".
+        block_reason returns a prompt-level block instead, which carries no candidate."""
         self.calls = []
         self.respond = respond or (lambda call: text)
         self.usage, self.raises, self.finish_reason = usage, raises, finish_reason
+        self.reason_shape, self.block_reason = reason_shape, block_reason
         self.models = SimpleNamespace(generate_content=self._generate)
+
+    def _wrap(self, reason):
+        if reason is None or self.reason_shape == "plain":
+            return reason
+        return SimpleNamespace(**{self.reason_shape: reason})
 
     def _generate(self, *, model, contents, config=None):
         call = {"model": model, "contents": contents, "config": config}
@@ -156,9 +165,14 @@ class FakeGenAIClient:
         if self.raises:
             raise self.raises
         text = self.respond(call)
-        candidate = SimpleNamespace(finish_reason=SimpleNamespace(value=self.finish_reason))
-        return SimpleNamespace(text=text, candidates=[candidate], model_dump=lambda: {
-            "candidates": [{"text": text}], "usage_metadata": self.usage})
+        dump = lambda: {"candidates": [{"text": text}], "usage_metadata": self.usage}
+        if self.block_reason is not None:        # a blocked prompt has no candidates at all
+            return SimpleNamespace(text=text, candidates=[], model_dump=dump,
+                                   prompt_feedback=SimpleNamespace(
+                                       block_reason=self._wrap(self.block_reason)))
+        candidate = SimpleNamespace(finish_reason=self._wrap(self.finish_reason))
+        return SimpleNamespace(text=text, candidates=[candidate], model_dump=dump,
+                               prompt_feedback=None)
 
 
 # --- plain HTTP --------------------------------------------------------------------------
