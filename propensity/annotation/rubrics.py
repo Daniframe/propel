@@ -133,12 +133,20 @@ def load_presentation(rubrics_dir=None) -> str:
     return _read(_root(rubrics_dir) / PRESENTATION_FILE)
 
 
+# The sentence that defines a propensity range. Rubrics write the threshold as "50%",
+# "50 percent" or "50 per cent", and a literal match for one of them reported the other two as
+# missing, which is a check failing rather than a rubric.
+PROPENSITY_RANGE = re.compile(r"at\s+least\s+(?:a\s+)?50\s*(?:%|per\s*cent)\s+probability",
+                              re.IGNORECASE)
+
+
 def check_rubric(text: str) -> list[str]:
     """The recommended checks a rubric does not pass; empty when it passes them all.
 
     Recommended: a `# ... PROPENSITY` title; `## Definition`, `## Levels` and `## Full examples`
     sections in that order; the definition's propensity-range sentence ("...with at least 50%
-    probability..."); seven `### Level` headings from -3 to +3 in order, with -3 and +3 written
+    probability...", however the threshold is spelled); seven `### Level` headings from -3 to +3
+    in order, with -3 and +3 written
     as saturating ("-3 or below", "+3 or above"); and full examples that include an orthogonal
     [-3, +3] case and a degenerate [0, 0] case.
 
@@ -159,7 +167,7 @@ def check_rubric(text: str) -> list[str]:
         problems.append("the sections are not in the order Definition, Levels, Full examples")
 
     definition = _section(text, "definition")
-    if "at least 50% probability" not in definition:
+    if not PROPENSITY_RANGE.search(definition):
         problems.append("the definition does not state the propensity range (\"...with at least "
                         "50% probability...\")")
 

@@ -5,7 +5,7 @@ says, never quietly.
 """
 
 # Defined before the imports below: the annotation runner records it on every row.
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 from .annotation import (
     ANNOTATION_SYSTEM,

@@ -72,7 +72,7 @@ The result of `check_rubric` on each current rubric ([recommended structure](rub
 
 | Code | Version | Result |
 |---|---|---|
-| `Ac` | v1 | does not pass all: the definition does not state the propensity range ("...with at least 50% probability..."); the full examples have no degenerate [0, 0] case |
+| `Ac` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `Af` | v1 | passes all |
 | `Ag` | v1 | passes all |
 | `Al` | v1 | passes all |
@@ -87,16 +87,16 @@ The result of `check_rubric` on each current rubric ([recommended structure](rub
 | `IM` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `Mc` | v1 | passes all |
 | `Ne` | v1 | passes all |
-| `Np` | v1 | does not pass all: the definition does not state the propensity range ("...with at least 50% probability..."); the full examples have no degenerate [0, 0] case |
+| `Np` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `Nr` | v1 | passes all |
 | `Op` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `Ps` | v1 | passes all |
-| `Pw` | v1 | does not pass all: the definition does not state the propensity range ("...with at least 50% probability..."); the full examples have no degenerate [0, 0] case |
+| `Pw` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `RA` | v2 | passes all |
 | `Sc` | v1 | does not pass all: no '## Full examples' section; the definition does not state the propensity range ("...with at least 50% probability..."); the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |
 | `SD` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `St` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `TD` | v1 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `Tr` | v1 | does not pass all: no '## Full examples' section; the definition does not state the propensity range ("...with at least 50% probability..."); the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |
-| `Ul` | v2 | does not pass all: the definition does not state the propensity range ("...with at least 50% probability..."); the full examples have no degenerate [0, 0] case |
+| `Ul` | v2 | does not pass all: the full examples have no degenerate [0, 0] case |
 | `Un` | v1 | does not pass all: the full examples have no orthogonal [-3, +3] case; the full examples have no degenerate [0, 0] case |

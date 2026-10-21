@@ -226,3 +226,26 @@ def test_a_well_formed_rubric_passes_the_structure_check():
 def test_the_structure_check_names_each_departure(edit, problem):
     problems = check_rubric(edit(GOOD_RUBRIC))
     assert len(problems) >= 1 and any(problem in found for found in problems), problems
+
+
+@pytest.mark.parametrize("threshold", [
+    "at least 50% probability",
+    "at least 50 percent probability",      # four shipped rubrics write it this way
+    "at least 50 per cent probability",
+    "at least 50 % probability",
+    "at least a 50% probability",
+    "AT LEAST 50 PERCENT PROBABILITY",
+])
+def test_the_propensity_range_sentence_is_recognised_however_the_threshold_is_spelled(threshold):
+    rubric = GOOD_RUBRIC.replace("at least 50% probability", threshold)
+    assert check_rubric(rubric) == [], f"{threshold!r} was not recognised"
+
+
+@pytest.mark.parametrize("threshold", [
+    "at least 50% chance",                  # not a probability
+    "at least 60% probability",             # not the 50% threshold
+    "50% probability",                      # no "at least"
+])
+def test_a_definition_without_the_threshold_is_still_reported(threshold):
+    rubric = GOOD_RUBRIC.replace("at least 50% probability", threshold)
+    assert any("propensity range" in problem for problem in check_rubric(rubric))

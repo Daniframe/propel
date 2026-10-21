@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.1
+
+- **Fixed: a rubric check reported a sentence that was there.** The propensity-range check
+  matched the threshold literally as `50%`, so the four rubrics that write "at least 50 percent
+  probability" - `Ac`, `Np`, `Pw` and `Ul` v2 - were warned about on every annotation run. The
+  check now accepts `%`, `percent` and `per cent`, in any case and with or without a space. No
+  rubric text changed, so annotations are unaffected; only the warning was wrong.
+  `BR`, `Sc` and `Tr` really do lack the sentence and are still reported.
+
+
 ## 0.5.0
 
 **Every fitted number changes.** Estimates from earlier versions are not comparable with these,
