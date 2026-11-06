@@ -124,7 +124,10 @@ def test_the_real_sdk_sends_what_the_api_expects():
 
     assert completion.text == "done" and completion.usage["total_token_count"] == 12
     path, key, body = seen[0]  # one request: automatic function calling is off
-    assert (len(seen), path, key) == (1, f"/v1beta/models/{MODEL}:generateContent", "g-key")
+    # The API version in the path is the SDK's to choose - /v1beta before google-genai 3.0,
+    # /v1 after - so this pins the model and the method, not the version.
+    assert (len(seen), key) == (1, "g-key")
+    assert path.endswith(f"/models/{MODEL}:generateContent"), path
     assert body["systemInstruction"]["parts"] == [{"text": "S"}]
     assert body["contents"] == [{"role": "user", "parts": [{"text": "U"}]}]
     assert body["generationConfig"] == {"temperature": 0.0, "maxOutputTokens": 100}

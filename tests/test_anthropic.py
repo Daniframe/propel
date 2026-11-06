@@ -196,7 +196,10 @@ def test_the_real_sdk_sends_what_the_api_expects_and_reads_back_a_batch():
 
     def handler(request):
         path = request.url.path
-        assert request.headers["x-api-key"] == "sk-test"
+        # How the key travels is the SDK's business and has changed across majors:
+        # x-api-key before 2.0, an Authorization bearer after. Either carries it.
+        assert "sk-test" in (request.headers.get("x-api-key", "")
+                             + request.headers.get("authorization", "")), request.headers
         if request.method == "POST":
             bodies[path] = json.loads(request.content)
             return http.Response(200, json=message if path == "/v1/messages" else batch)
